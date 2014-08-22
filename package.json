@@ -1,0 +1,28 @@
+{
+    "name": "think-orm",
+    "version": "1.0.1",
+    "description": "A powerful ORM tool for node.js, support Mysql.",
+    "main": "index.js",
+    "author": "happen-zhang <zhanghaipeng404@gmail.com>",
+    "scripts": {
+        "test": "make test"
+    },
+    "contributors": [
+        "happen-zhang <zhanghaipeng404@gmail.com>"
+    ],
+    "keywords": [
+        "class",
+        "class-like",
+        "prototypal"
+    ],
+    "repository" : {
+        "type": "git",
+        "url": "git://github.com/happen-zhang/cakes.git"
+    },
+    "devDependencies": {
+        "chai": "1.9.0",
+        "mocha": "1.17.1",
+        "jshint": "2.5.1",
+        "istanbul": "0.3.0"
+    }
+}
