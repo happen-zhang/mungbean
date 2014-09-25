@@ -1,37 +1,79 @@
+ThinkORM —— 基于Node.js的简单、易容、强大的ORM工具。
+==========
 
-# think-orm #
+# 概述 #
 
-A simple ORM tool for Mysql.
+基于Node.js编写的一个简单，易用，强大的ORM工具（目前只支持Mysql），想法来源于**ThinkPHP**的模型层。
 
-## Feature ##
-
-* Supports promise
-
-* Powerful query builder language
-
-* Simplify insert, update and delete operations
-
-* Flexible configuration to use
-
-## How to use ##
+## 简单的例子 ##
 
 ```Javascript
 var ThinkORM = require('think-orm');
-
-// Or new ThinkORM('mysql://username:passwd@localhost:3306/DbName#utf8')
-var models = new ThinkORM({
-    host: 'localhost',
-    port: 3306,
-    username: 'root',
-    password: '',
-    database: 'example'
+var ORM = new ThinkORM({
+    dbType   : 'mysql',
+    host     : 'localhost',
+    port     : 3306,
+    username : 'root',
+    password : 'test',
+    database : 'test',
+    prefix   : 'easy_',
+    charset  : 'utf8'
 });
 
-// will create a mapper from example table.
-var Post = models('Post');
+var User = ThinkORM.model('user');
+
+// sql: SELECT * FROM `user` ORDER BY id DESC LIMIT 5
+User.order('id DESC').limit(5).select().then(function(users) {
+    // [{id: 1, name: '...'}, {id: 2, name: '....'}, ...]
+    console.log(users);
+});
 ```
 
-## Select ##
+# 安装 #
+
+```
+npm install think-orm
+```
+
+# 文档 #
+
+## 设计理念 ##
+
+ThinkORM名字中带有'ORM'三个字母，可能大家会误以为其和传统ORM的设计思路相似，只是换了一层接口而已。其实，ThinkORM的设计思路和传统ORM的设计思路还是有比较大的区别的，这里就来说明ThinkORM的不同之处。
+
+模型映射到一张表，对模型的操作就是直接对数据表进行操作。数据表中的一条记录不映射到一个对象上，在ThinkORM中没有这样的概念，数据表中的记录都只映射为javascript中的一个普通对象。
+
+## 连接数据库 ##
+
+## 模型定义 ##
+
+## 链式操作 ##
+
+## CRUD操作 ##
+
+### 数据创建 ###
+
+```Javascript
+Post.create({title: 'hello'}).then(function(post) {
+    console.log(post);
+}).otherwise(function(err) {
+    console.log(err);
+});
+```
+
+### 数据写入 ###
+
+```Javascript
+Post.create({title: 'hello'}).then(function(post) {
+    return Post.add(post);
+}).then(function(newPost) {
+    console.log('insert success.');
+}).otherwise(function(err) {
+    console.log(err);
+});
+```
+
+### 数据读取 ###
 
 ```Javascript
 // select posts from example.post table with id and title fields.
@@ -45,17 +87,7 @@ Post.field(['id', 'title']).where({ id: { 'lt': 3 } })
                            });
 ```
 
-## Add ##
-
-```Javascript
-Post.create({title: 'hello'}).add().then(function(newPost) {
-    console.log('insert success.');
-}).catch(function(err) {
-    console.log(err);
-});
-```
-
-## Update ##
+### 数据更新 ###
 
 ```Javascript
 Post.where({title: 'hello'}).save({title: 'world'}).then(function(post) {
@@ -65,7 +97,7 @@ Post.where({title: 'hello'}).save({title: 'world'}).then(function(post) {
 });
 ```
 
-## Delete ##
+### 数据删除 ###
 
 ```Javascript
 Post.delete({title: 'hello'}).then(function(oldPost) {
@@ -75,13 +107,21 @@ Post.delete({title: 'hello'}).then(function(oldPost) {
 });
 ```
 
-## API Documents ##
+## 数据查询 ##
 
-TODO...
+## 数据验证 ##
 
-## TODO ##
+## 数据填充 ##
 
-Still in developing...
+## 字段映射 ##
+
+## 视图模型 ##
+
+## 关联模型 ##
+
+# TODO #
+
+* [ ] 众多文档，功能和测试
 
 ## License ##
 
