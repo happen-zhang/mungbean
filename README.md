@@ -469,6 +469,31 @@ where['name&title|address'] = { like: 'orm' };
 
 > 快捷查询为不同字段指定不同条件时，不能把'|'和'&'混用。需要注意的是，不同字段所对应的条件是按照出现的顺序来赋值的。
 
+### 区间查询 ###
+
+ThinkORM支持对某些字段进行区间查询，例如：
+
+```Javascript
+// `id` > 10 AND `id` < 30
+where.id = [{ gt: 10 }, { lt: 30 }];
+```
+
+区间查询也可以支持`OR`和`XOR`逻辑：
+
+```Javascript
+// `id` > 10 OR `id` < 30
+where.id = [{ gt: 10 }, { lt: 30 }, 'OR'];
+```
+
+> 逻辑操作符AND，OR和XOR只能作为数组的最后一个元素，默认是AND。
+
+区间查询的条件可以支持普通查询的所有表达式，也就是说类似`LIKE`、`GT`和`EXP`这样的表达式都可以支持。另外区间查询还可以支持更多的条件，只要是针对一个字段的条件都可以写到一起，例如：
+
+```Javascript
+// `name` LIKE '%orm%' OR `name` = 'nodejs' OR `name` = 'think'
+where.name = [{ like: '%orm%' }, 'nodejs', 'think', 'OR'];
+```
+
 ## 数据验证 ##
 
 ## 数据填充 ##
