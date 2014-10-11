@@ -111,7 +111,9 @@ Post.delete({title: 'hello'}).then(function(oldPost) {
 
 ThinkORM可以支持以字符串或者对象为条件的查询参数。但大多数情况下，使用对象查询参数会比较安全。
 
-### 字符串条件 ###
+### 查询方式 ###
+
+#### 字符串条件 ####
 
 这是最简单的查询方式，但由于字符串中可能包含不安全字符，所以需要进行一些安全性的考虑。下面就是一个简单的例子：
 
@@ -124,7 +126,7 @@ User.where('age >= 20 AND status = 1').select().then(function(users) {
 
 > ThinkORM在对字符串条件查询时进行了对不安全字符的过滤，但建议用户在使用字符串查询时先进行必要的过滤。
 
-### 对象查询条件 ###
+#### 对象查询条件 ####
 
 这是最常用的查询方式，例如：
 
@@ -172,6 +174,244 @@ User.where(conditions).select().then(function(users) {});
 > 如果在调试（debug）模式下，无效字段将会导致查询抛出异常，而不是静默地过滤无效字段。
 
 使用对象查询条件比字符串查询条件更加方便和安全，推荐使用对象来作为查询条件。
+
+### 查询表达式 ###
+
+上面提到了查询条件可以使用字符串，但在大多数时候使用对象作为查询条件比较多。
+
+查询表达式就是以对象作为查询条件的一种查询方式，它可以支持比较判断，它的格式类似于下面这种形式：
+
+```Javascript
+var where = { };
+// where['fieldname'] = { 'expression': 'value' };
+where.fieldname = { 'expression': 'value' };
+```
+
+`expression`部分即为支持可用的表达式键，`value`则为满足条件的值。支持的表达式如下：
+
+|     表达式    |          含义        | 辅助记忆 |
+| ------------ | -------------------- | ------- |
+|      EQ      | 等于（=）             | Equal |
+|      NEQ     | 不等于（<>）          | Not Equal |
+|      GT      | 大于（>）             | Greater Then |
+|     EGET     | 大于等于（>=）        | Equal or Greater Then |
+|      LT      | 小于（<）             | Less Then |
+|      ELT     | 小于等于（<=）        | Equal or Less Then |
+|     LIKE     | 模糊查询              |  |
+| [NOT]BETWEEN | （不在）区间查询       |  |
+|    [NOT]IN   | （不在）IN查询        |  |
+|      EXP     | 表达式查询，支持SQL语法 | Expression |
+
+以上即为支持可用的表达式键，**不区分大小写** 。下面为各表达式的使用例子：
+
+#### EQ：等于（=） ####
+
+例如：
+
+```Javascript
+// where['id'] = { eq: 23333 };
+where.id = { eq: 23333 };
+```
+
+或者：
+
+```Javascript
+// where['id'] = { '=': 23333 };
+where.id = { '=': 23333 };
+```
+
+和上面的查询等效：
+
+```Javascript
+// where['id'] = 23333;
+where.id = 23333;
+```
+
+`EQ`表达式生成的SQL语句类似如下：
+
+```Javascript
+// SELECT * FROM `user` WHERE `id` = 23333
+User.where({ id: { eq: 23333 } }).select().then(function(user) {});
+```
+
+#### NEQ：不等于（<>） ####
+
+例如：
+
+```Javascript
+// where['id'] = { neq: 23333 };
+where.id = { neq: 23333 };
+```
+
+或者：
+
+```Javascript
+// where['id'] = { '<>': 23333 };
+where.id = { '<>': 23333 };
+```
+
+`NEQ`表达式生成的SQL语句类似如下：
+
+```Javascript
+// SELECT * FROM `user` WHERE `id` <> 23333
+User.where({ id: { neq: 23333 } }).select().then(function(user) {});
+```
+
+#### GT：大于（>） ####
+
+例如：
+
+```Javascript
+// where['id'] = { gt: 23333 };
+where.id = { gt: 23333 };
+```
+
+或者：
+
+```Javascript
+// where['id'] = { '>': 23333 };
+where.id = { '>': 23333 };
+```
+
+`GT`表达式生成的SQL语句类似如下：
+
+```Javascript
+// SELECT * FROM `user` WHERE `id` > 23333
+User.where({ id: { gt: 23333 } }).select().then(function(user) {});
+```
+
+#### EGT：大于等于（>=） ####
+
+例如：
+
+```Javascript
+// where['id'] = { egt: 23333 };
+where.id = { egt: 23333 };
+```
+
+或者：
+
+```Javascript
+// where['id'] = { '>=': 23333 };
+where.id = { '>=': 23333 };
+```
+
+`EGT`表达式生成的SQL语句类似如下：
+
+```Javascript
+// SELECT * FROM `user` WHERE `id` >= 23333
+User.where({ id: { egt: 23333 } }).select().then(function(user) {});
+```
+
+#### LT：小于（<） ####
+
+例如：
+
+```Javascript
+// where['id'] = { lt: 23333 };
+where.id = { lt: 23333 };
+```
+
+或者：
+
+```Javascript
+// where['id'] = { '<': 23333 };
+where.id = { '<': 23333 };
+```
+
+`LT`表达式生成的SQL语句类似如下：
+
+```Javascript
+// SELECT * FROM `user` WHERE `id` < 23333
+User.where({ id: { lt: 23333 } }).select().then(function(user) {});
+```
+
+#### ELT：小于等于（<=） ####
+
+例如：
+
+```Javascript
+// where['id'] = { elt: 23333 };
+where.id = { elt: 23333 };
+```
+
+或者：
+
+```Javascript
+// where['id'] = { '<=': 23333 };
+where.id = { '<=': 23333 };
+```
+
+`ELT`表达式生成的SQL语句类似如下：
+
+```Javascript
+// SELECT * FROM `user` WHERE `id` <= 23333
+User.where({ id: { elt: 23333 } }).select().then(function(user) {});
+```
+
+#### [NOT]LIKE：模糊查询 ####
+
+`[NOT]LIKE`表达式支持模糊查询，同SQL中`(NOT) LIKE`语法相同。
+
+```Javascript
+// `name` LIKE '%orm%'
+where.name = { like: '%orm%' };
+
+// `name` NOT LIKE '%orm%'
+where.name = { notlike: '%orm%' };
+```
+
+`[NOT]LIKE`也支持多条件形式的模糊查询，它支持`AND`，`OR`和`XOR`的逻辑组合：
+
+```Javascript
+// `name` LIKE 'orm' OR `name` LIKE '%nodejs%' AND `name` LIKE '_He%' XOR `name` LIKE '%js'
+where.name = {
+    like: {
+        or: ['orm', '%nodejs%'],
+        and: '_He%',
+        xor: '%js'
+    }
+};
+```
+
+上面是一个比较复杂的模糊查询。`AND`，`OR`和`XOR`的值支持字符串或者是数组。
+
+#### [NOT]BETWEEN：区间查询 ####
+
+`[NOT]BETWEEN`表达式支持区间查询，同SQL中`(NOT) BETWEEN...AND...`语法相同。
+
+```Javascript
+// `id` BETWEEN 100 AND 200
+where.id = { between: '100, 200' };
+
+// `id` NOT BETWEEN 100 AND 200
+where.id = { notbetween: '100, 200' };
+```
+
+或者使用数组作为区间：
+
+```Javascript
+where.id = { between: [100, '200'] };
+```
+
+#### [NOT]IN： IN查询 ####
+
+`[NOT]IN`表达式支持IN查询，同SQL中`(NOT) IN`语法相同。
+
+```Javascript
+// `id` IN ('100','200','300','400')
+where.id = { in: '100, 200, 300, 400' };
+
+// `id` NOT IN ('100','200','300','400')
+where.id = { notin: '100, 200, 300, 400' };
+```
+
+或者使用数组作为IN的条件：
+
+```Javascript
+// `id` IN (100,'200',300,'400')
+where.id = { in: [100, '200', 300, '400'] };
+```
 
 ## 数据验证 ##
 
