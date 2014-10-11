@@ -109,6 +109,70 @@ Post.delete({title: 'hello'}).then(function(oldPost) {
 
 ## 数据查询 ##
 
+ThinkORM可以支持以字符串或者对象为条件的查询参数。但大多数情况下，使用对象查询参数会比较安全。
+
+### 字符串条件 ###
+
+这是最简单的查询方式，但由于字符串中可能包含不安全字符，所以需要进行一些安全性的考虑。下面就是一个简单的例子：
+
+```Javascript
+// SELECT * FROM `user` WHERE (age >= 20 AND status = 1)
+User.where('age >= 20 AND status = 1').select().then(function(users) {
+    console.log(users);
+});
+```
+
+> ThinkORM在对字符串条件查询时进行了对不安全字符的过滤，但建议用户在使用字符串查询时先进行必要的过滤。
+
+### 对象查询条件 ###
+
+这是最常用的查询方式，例如：
+
+```Javascript
+var conditions = {
+    name: 'thinkorm',
+    age: 12,
+    status: 0
+};
+
+// SELECT * FROM `user` WHERE `name` = 'thinkorm' AND `age` = 12 AND `status` = 0
+User.where(conditions).select().then(function(users) {
+    console.log(users);
+});
+```
+
+多个字段间的默认逻辑是使用`AND`的，如果需要使用`OR`的话，可以在对象查询条件中定义一个`_logic`键，比如：
+
+```Javascript
+var conditions = {
+    name: 'thinkorm',
+    age: 12,
+    status: 0,
+    _logic: 'OR'
+};
+
+// SELECT * FROM `user` WHERE `name` = 'thinkorm' OR `age` = 12 OR `status` = 0
+User.where(conditions).select().then(function(users) {});
+```
+
+在使用对象查询条件时，ThinkORM会自动检查字段的有效性。如果对象中定义的查询字段在表中不存在，ThinkORM则会把无效的字段过滤掉，例如：
+
+```Javascript
+var conditions = {
+    name: 'thinkorm',
+    test: 'hello'
+};
+
+// SELECT * FROM `user` WHERE `name` = 'thinkorm'
+User.where(conditions).select().then(function(users) {});
+```
+
+上面`conditions`对象中的`test`字段在表中不存在，那么`test`字段将被视作为无效条件过滤掉。
+
+> 如果在调试（debug）模式下，无效字段将会导致查询抛出异常，而不是静默地过滤无效字段。
+
+使用对象查询条件比字符串查询条件更加方便和安全，推荐使用对象来作为查询条件。
+
 ## 数据验证 ##
 
 ## 数据填充 ##
