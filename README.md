@@ -434,6 +434,41 @@ where.id = { exp: 'IN (1, 3, 8)' };
 User.where({ id: 1 }).save({ score: { exp: 'score+1' } }).then(function() {});
 ```
 
+### 快捷查询 ###
+
+快捷查询方式是一种多字段查询的简化写法，可以进一步简化查询条件的写法，在多个字段之间用`|`分割表示`OR`查询，用`&`分割表示`AND`查询。例如：
+
+```Javascript
+where['name|title'] = 'orm';
+
+// SELECT * FROM `user` WHERE (`name` = 'orm' OR `title` = 'orm')
+User.where(where).select().then(function() {});
+```
+
+当然，使用`&`或`|`快捷查询支持为不同字段指定不同条件的情况：
+
+```Javascript
+// `name` LIKE '%orm%' OR `age` = 12 OR `score` > 3
+where['name|age|score'] = [{ like: '%orm%' }, 12, { gt: 3 }];
+```
+
+上面的形式等价于：
+
+```Javascript
+where.name = { like: '%orm%' };
+where.age = 12;
+where.score = { gt: 3 };
+```
+
+`&`和`|`可以混合使用，但这种使用方式只能支持单一条件，即所有字段都只能应用同一个条件，例如：
+
+```Javascript
+// `name` LIKE 'orm' AND `title` LIKE 'orm' OR `address` LIKE 'orm'
+where['name&title|address'] = { like: 'orm' };
+```
+
+> 快捷查询为不同字段指定不同条件时，不能把'|'和'&'混用。需要注意的是，不同字段所对应的条件是按照出现的顺序来赋值的。
+
 ## 数据验证 ##
 
 ## 数据填充 ##
