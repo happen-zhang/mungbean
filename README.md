@@ -413,6 +413,27 @@ where.id = { notin: '100, 200, 300, 400' };
 where.id = { in: [100, '200', 300, '400'] };
 ```
 
+#### EXP：查询表达式 ####
+
+使用`EXP`能支持更加复杂的查询条件，比如：
+
+```Javascript
+where.id = { in: '1, 3 , 8' };
+```
+
+可以改成：
+
+```Javascript
+where.id = { exp: 'IN (1, 3, 8)' };
+```
+
+`EXP`查询条件可以是任何有效的SQL语句，包括SQL支持的函数或者是表字段等。`EXP`不仅能供查询使用，而且还能支持数据更新：
+
+```Javascript
+// UPDATE `user` SET `score`=score+1 WHERE `id` = 1
+User.where({ id: 1 }).save({ score: { exp: 'score+1' } }).then(function() {});
+```
+
 ## 数据验证 ##
 
 ## 数据填充 ##
