@@ -494,6 +494,60 @@ where.id = [{ gt: 10 }, { lt: 30 }, 'OR'];
 where.name = [{ like: '%orm%' }, 'nodejs', 'think', 'OR'];
 ```
 
+### 组合查询 ###
+
+组合查询是一种可以混用的查询方式，查询的主体还是采用对象作为查询条件，只是加入了一些特殊的查询支持，包括字符串模式查询（`_string`）、复合查询（`_complex`）、请求字符串查询（`_query`）。
+
+#### 字符串模式查询 ####
+
+对象条件可以和字符串条件混用（`_string`作为查询条件），例如：
+
+```Javascript
+where.id = { gt: 100 };
+where.name = 'orm';
+where._string = 'status=1 AND score>10';
+
+// SELECT * FROM `user` WHERE `id` > 100 OR `name` = 'orm' OR (status=1 AND score>10)
+User.where(where).select().then(funciton(users) {});
+```
+
+#### 请求字符串查询 ####
+
+请求字符串查询是一种类似于URL传参的方式，可以支持简单的条件相等判断。
+
+```Javascript
+where.id = { gt: 100 };
+where._query = 'status=1&score=100&_logic=or';
+
+// SELECT * FROM `user` WHERE `id` > 100 AND (`status`='1' OR `score`='100')
+User.where(where).select().then(funciton(users) {});
+```
+
+#### 复合查询 ####
+
+复合查询相当于封装了一个新的查询条件，然后并入原来的查询条件之中，所以可以完成比较复杂的查询条件组装。 例如：
+
+```Javascript
+where.name = { like: '%thinkorm%' };
+where.title = { like: '%nodejs%' };
+where._logic = 'OR';
+
+map.id = { gt: 1 };
+map._complex = where;
+
+// SELECT * FROM `post` WHERE `id` > 1 AND (`name` LIKE '%thinkorm%' OR `title` LIKE '%nodejs%')
+Post.where(map).select().then(function(posts) {});
+```
+
+复合查询使用了`_complex`作为子查询条件来定义，配合之前的查询方式，可以非常灵活的制定更加复杂的查询条件。 很多查询方式可以相互转换，例如上面的查询条件可以改成：
+
+```Javascript
+where.id = { gt: 1 };
+where._string = "name LIKE '%thinkorm%' OR title LIKE '%nodejs%'";
+```
+
+这个结果和使用`_complex`的例子是一样的。
+
 ## 数据验证 ##
 
 ## 数据填充 ##
