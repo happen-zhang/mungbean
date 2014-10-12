@@ -548,6 +548,74 @@ where._string = "name LIKE '%thinkorm%' OR title LIKE '%nodejs%'";
 
 这个结果和使用`_complex`的例子是一样的。
 
+### 统计查询 ###
+
+在应用中我们经常会用到一些统计数据，例如当前所有（或者满足某些条件）的用户数、所有用户的最大积分、用户的平均成绩等等，ThinkORM为这些统计操作提供了一系列的内置方法，这些方法的作用类似于SQL中对应的函数，包括：
+
+|  方法  | 说明 |
+| ----- | ---- |
+| count | 统计数量，默认是统计“*” |
+|  max  | 获取最大值 |
+|  min  | 获取最小值 |
+|  avg  | 获取平均值 |
+|  sum  | 获取总和   |
+
+#### count ####
+
+统计用户总数：
+
+```Javascript
+// User.count('*').then(function(result) {});
+User.count().then(function(result) {});
+```
+
+或者根据字段进行统计：
+
+```Javascript
+// SELECT COUNT(`id`) FROM `user`
+User.count('id').then(function(result) {});
+```
+
+#### max ####
+
+获取用户中的最大年龄：
+
+```Javascript
+// SELECT MAX(`age`) FROM `user` WHERE `status` = 1
+User.where({ status: 1 }).max('age').then(function() {});
+```
+
+#### min ####
+
+获取用户中的最小年龄：
+
+```Javascript
+// SELECT MIN(`age`) FROM `user` WHERE `status` = 1
+User.where({ status: 1 }).min('age').then(function(result) {});
+```
+
+#### avg ####
+
+获取用户平均年龄：
+
+```Javascript
+// SELECT AVG(`age`) FROM `user`
+User.avg('age').then(function(result) {});
+```
+
+#### sum ####
+
+获取用户的年龄总和：
+
+```Javascript
+// SELECT SUM(`age`) FROM `user`
+User.sum('age').then(function(result) {});
+```
+
+统计查询方法都支持连贯操作的方式使用。
+
+> 这里的五个方法中，返回的结果都为一个数值。除了count方法外，max，min，avg，sum都需要提供一个字段名作为参数，否则结果将会是NaN。
+
 ## 数据验证 ##
 
 ## 数据填充 ##
