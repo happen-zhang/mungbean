@@ -102,6 +102,74 @@ ThinkORM名字中带有'ORM'三个字母，可能大家会误以为其和传统O
 
 ## 连贯操作 ##
 
+ThinkORM模型提供连贯操作方法（也可以称作链式操作），它可以有效的提高数据存取的代码清晰度和开发效率，并且支持所有的CRUD操作。
+
+连贯操作的使用也比较简单， 假如我们现在要查询一个`User`表的满足`status`值为1的前10条记录，并希望按照`created_at`排序 ，代码如下：
+
+```Javascript
+// SELECT * FROM `user` WHERE `status` = 1 ORDER BY created_at DESC LIMIT 10
+User.where({ status: 1 }).order('created_at DESC').limit(10).select().then(function(users) {
+    console.log(users);
+});
+```
+
+这里的`where`、`order`和`limit`方法就被称之为连贯操作方法，除了`select`方法必须放到最后一个外（因为`select`方法并不是连贯操作方法，它返回的时一个`Promise`）。连贯操作的方法调用顺序没有先后，例如，下面的代码和上面的等效：
+
+```Javascript
+User.order('created_at DESC').limit(10).where({ status: 1 }).select().then(function(users) {
+    console.log(users);
+});
+```
+
+如果不习惯使用连贯操作的话，还支持直接使用参数进行查询的方式。例如上面的代码可以改写为：
+
+```Javascript
+User.select({where: { status: 1 }, order: 'created_at DESC', limit: 10}).then(function(users) {
+    console.log(users);
+});
+```
+
+使用上面方式取代连贯查询的话，键的名称就是连贯操作的方法名称。其实不仅仅是查询方法可以使用连贯操作，包括所有的CRUD方法都可以使用，例如：
+
+```Javascript
+// SELECT `id`,`name`,`age` FROM `user` WHERE (id = 1) LIMIT 1
+User.where('id = 1').field('id, name, age').find().then(function(user) {});
+
+// UPDATE `user` SET `name`='hello' WHERE `name` LIKE 'orm'
+User.where({ name: { like: 'orm' } }).save({ name: 'hello' }).then(function(result) {});
+```
+
+连贯操作通常只有一个参数，并且仅在当此查询或者操作有效，完成后会自动清空连贯操作的所有传值（有个别特殊的连贯操作有多个参数，并且会记录当前的传值）。简而言之，连贯操作的结果不会带入以后的查询。
+
+系统支持的连贯操作方法有：
+
+| 方法名  | 作用 | 参数类型 |
+| ------ | --- | ------- |
+| where  | 查询或者更新条件的定义 | String，Array，Object |
+| table  | 定义要操作的数据表名称 | String，Array |
+| alias  | 定义当前表的别名      | String |
+| data   | 新增或者更新数据之前有效的数据对象 | Object |
+| field  | 定义查询或者更新需要的字段（支持字段排除） | String，Array |
+| order  | 定义结果排序 | String，Object |
+| limit  | 定义返回查询结果的数量 | String，Number |
+| page   | 定义分页查询 | String，Number |
+| group  | 对查询group支持 | String |
+| having | 对查询having支持 | String |
+| join   | 对查询join支持 | String，Object |
+| union  | 对查询union支持 | String，Object |
+| distinct | 对查询distinct支持 | Boolean |
+| lock   | 对查询having支持 | Boolean |
+| cache  |                |         |
+| relation | 启用关联查询 | String |
+| validate | 数据自动验证 | Object |
+| auto | 数据自动完成 | Object |
+| filter | 数据过滤 | String |
+| scope | 命名范围 | String，Object |
+| comment | SQL注释 | String |
+| index | 数据索引 | String |
+
+> 所有的连贯操作都返回当前的模型实例对象（this），其中where，join，union，scope方法支持多次调用。
+
 ## CRUD操作 ##
 
 ### 数据创建 ###
@@ -765,7 +833,7 @@ var sql = Model.field('id,name').table('user').group('age').where({id: {gt: 5}})
 Model.table(sql + ' aliasname').select().then(function(users) {});
 ```
 
-构造的子查询SQL可用于[连贯操作]()方法，例如`table`，`where`等。
+构造的子查询SQL可用于[连贯操作](#%E8%BF%9E%E8%B4%AF%E6%93%8D%E4%BD%9C)方法，例如`table`，`where`等。
 
 ## 数据验证 ##
 
