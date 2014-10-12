@@ -616,6 +616,42 @@ User.sum('age').then(function(result) {});
 
 > 这里的五个方法中，返回的结果都为一个数值。除了count方法外，max，min，avg，sum都需要提供一个字段名作为参数，否则结果将会是NaN。
 
+### SQL查询 ###
+
+ThinkORM虽然提供了许多方便的查询方法，但为了满足复杂查询的需要和一些特殊的数据操作，还是保留了支持原生SQL查询的功能。SQL查询的返回值依赖于底层库返回的结果，ThinkORM未对原生结果进行处理。
+
+支持原生SQL查询的方法有`query`和`execute`。
+
+#### query方法 ####
+
+`query`方法用于执行SQL查询操作，返回原生的结果集。如果SQL语句有语法错误或者数据库错误，则抛出异常。
+
+```Javascript
+Model.query('SELECT * FROM think_user WHERE status = 1');
+```
+
+`query`方法支持表前缀和表名的简化写法，这样便于更改表前缀，这里有三种形式的前缀：
+
+|        形式        | 替换为 |
+| ---------------   | ------ |
+| \_\_PREFIX\_\_    | 替换为当前表前缀 |
+| \_\_TABLE\_\_     | 替换为当前表名称 |
+| \_\_MODELNAME\_\_ | 替换成前缀 + 表名称的形式 |
+
+例如：
+
+```Javascript
+Model.query('SELECT * FROM __PREFXI__user');
+
+Model.query('SELECT * FROM __TABLE__');
+
+Model.query('SELECT * FROM __USER__');
+```
+
+#### execute方法 ####
+
+`execute`方法用于写入和更新数据，返回原生结果。它支持的用法同`query`方法。
+
 ## 数据验证 ##
 
 ## 数据填充 ##
