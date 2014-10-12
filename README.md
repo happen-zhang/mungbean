@@ -686,6 +686,34 @@ User.getFieldBy('id', { egt: 1 }, 'name, age, id').then(function(result) {});
 
 查询数据量比较大时，对于字段多的表，指定表中字段是十分必要的。
 
+### 子查询 ###
+
+ThinkORM提供两种方式来支持子查询，一种是通过`select`方法，另一种是`buildSql`方法。
+
+#### select ####
+
+当调用`select`方法时给它传递一个`false`参数时，表示`select`不进行查询，只是返回构建的SQL语句，例如：
+
+```Javascript
+// SELECT `id`,`name` FROM `user` WHERE `id` > 5 GROUP BY age ORDER BY status ASC
+Model.field('id,name').table('user').group('age').where({id: {gt: 5}}).order('status ASC').select(false).then(function(sql) {
+    console.log(sql);
+});
+```
+
+#### buildSql ####
+
+调用`buildSql`方法后不会进行实际的查询操作，而只是生成该次查询的SQL语句（为了避免混淆，会在SQL两边加上括号），然后我们直接在后续的查询中直接调用，例如：
+
+```
+var sql = Model.field('id,name').table('user').group('age').where({id: {gt: 5}}).order('status ASC').getBuildSql();
+
+// SELECT * FROM (SELECT `id`,`name` FROM `user` WHERE `id` > 5 GROUP BY age ORDER BY status ASC) aliasname
+Model.table(sql + ' aliasname').select().then(function(users) {});
+```
+
+构造的子查询SQL可用于[连贯操作]()方法，例如`table`，`where`等。
+
 ## 数据验证 ##
 
 ## 数据填充 ##
