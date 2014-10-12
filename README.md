@@ -650,7 +650,41 @@ Model.query('SELECT * FROM __USER__');
 
 #### execute方法 ####
 
-`execute`方法用于写入和更新数据，返回原生结果。它支持的用法同`query`方法。
+`execute`方法用于写入和更新数据，返回原生结果。它支持的用法同[query](https://github.com/happen-zhang/think-orm#query%E6%96%B9%E6%B3%95)方法。
+
+### 字段查询 ###
+
+ThinkORM提供了字段查询，方便了可以按照某个字段的要求进行查询。
+
+#### getBy：根据字段值查询数据 ####
+
+`getBy`查询方式针对数据表的字段进行查询。例如，`User`模型对应的表拥有`id`，`name`字段，那么我们就可以下面的方式进行查询：
+
+```Javascript
+// SELECT * FROM `user` WHERE `id` = 1 LIMIT 1
+User.getBy('id', 1).then(function(user) {});
+
+// SELECT * FROM `user` WHERE `name` LIKE 'orm' LIMIT 1
+User.getBy({ name: { like: 'orm' } }).then(function(user) {});
+```
+
+> getBy方法默认对结果集进行了LIMIT 1，这意味着getBy方法只能返回一行结果。
+
+#### getFieldBy：根据字段值查询并返回某个字段的值 ####
+
+`getFieldBy`方法和`getBy`方法类似，只是多了一个参数来支持期望获得的字段值，例如：
+
+```Javascript
+// SELECT `id` FROM `user` WHERE `id` >= 1
+// [1, 2, 3, 4, 5]
+User.getFieldBy('id', { egt: 1 }, 'id').then(function(result) {});
+
+// SELECT `name`,`age`,`id` FROM `user` WHERE `id` >= 1
+// [{orm: { name: 'orm', age: 12, id: 1 }}, ...]
+User.getFieldBy('id', { egt: 1 }, 'name, age, id').then(function(result) {});
+```
+
+查询数据量比较大时，对于字段多的表，指定表中字段是十分必要的。
 
 ## 数据验证 ##
 
