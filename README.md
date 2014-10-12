@@ -37,6 +37,59 @@ npm install think-orm
 
 # 文档 #
 
+## 索引 ##
+
+* [设计理念](#%E8%AE%BE%E8%AE%A1%E7%90%86%E5%BF%B5)
+* [连接数据库](#%E8%BF%9E%E6%8E%A5%E6%95%B0%E6%8D%AE%E5%BA%93)
+* [连贯操作]()
+* [CRUD操作](#crud%E6%93%8D%E4%BD%9C)
+    * [数据创建](#%E6%95%B0%E6%8D%AE%E5%88%9B%E5%BB%BA)
+    * [数据写入](#%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5)
+    * [数据读取](#%E6%95%B0%E6%8D%AE%E8%AF%BB%E5%8F%96)
+    * [数据更新](#%E6%95%B0%E6%8D%AE%E6%9B%B4%E6%96%B0)
+    * [数据删除](#%E6%95%B0%E6%8D%AE%E5%88%A0%E9%99%A4)
+* [数据查询](#%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2)
+    * [查询方式](#%E6%9F%A5%E8%AF%A2%E6%96%B9%E5%BC%8F)
+        * [字符串条件](#%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%9D%A1%E4%BB%B6)
+        * [对象条件]()
+    * [表达式查询](#%E6%9F%A5%E8%AF%A2%E8%A1%A8%E8%BE%BE%E5%BC%8F)
+        * [EQ](#eq%E7%AD%89%E4%BA%8E)
+        * [NEQ](#neq%E4%B8%8D%E7%AD%89%E4%BA%8E)
+        * [GT](#gt%E5%A4%A7%E4%BA%8E)
+        * [EGT](#egt%E5%A4%A7%E4%BA%8E%E7%AD%89%E4%BA%8E)
+        * [LT](#lt%E5%B0%8F%E4%BA%8E)
+        * [ELT](#elt%E5%B0%8F%E4%BA%8E%E7%AD%89%E4%BA%8E)
+        * [[NOT]LIKE](#notlike%E6%A8%A1%E7%B3%8A%E6%9F%A5%E8%AF%A2)
+        * [[NOT]BETWEEN](#notbetween%E5%8C%BA%E9%97%B4%E6%9F%A5%E8%AF%A2)
+        * [[NOT]IN](#notin-in%E6%9F%A5%E8%AF%A2)
+        * [EXP](#exp%E6%9F%A5%E8%AF%A2%E8%A1%A8%E8%BE%BE%E5%BC%8F)
+    * [快捷查询](#%E5%BF%AB%E6%8D%B7%E6%9F%A5%E8%AF%A2)
+    * [区间查询](#%E5%BF%AB%E6%8D%B7%E6%9F%A5%E8%AF%A2)
+    * [组合查询](#%E7%BB%84%E5%90%88%E6%9F%A5%E8%AF%A2)
+        * [字符串模式查询](#%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%A8%A1%E5%BC%8F%E6%9F%A5%E8%AF%A2)
+        * [请求字符串查询](#%E8%AF%B7%E6%B1%82%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%9F%A5%E8%AF%A2)
+        * [复合查询](#%E5%A4%8D%E5%90%88%E6%9F%A5%E8%AF%A2)
+    * [统计查询](#%E7%BB%9F%E8%AE%A1%E6%9F%A5%E8%AF%A2)
+        * [count](#count)
+        * [max](#max)
+        * [min](#min)
+        * [avg](#avg)
+        * [sum](#sum)
+    * [SQL查询](#sql%E6%9F%A5%E8%AF%A2)
+        * [query](#query%E6%96%B9%E6%B3%95)
+        * [execute](#execute%E6%96%B9%E6%B3%95)
+    * [字段查询](#%E5%AD%97%E6%AE%B5%E6%9F%A5%E8%AF%A2)
+        * [getBy](#getby%E6%A0%B9%E6%8D%AE%E5%AD%97%E6%AE%B5%E5%80%BC%E6%9F%A5%E8%AF%A2%E6%95%B0%E6%8D%AE)
+        * [getFieldBy](#getfieldby%E6%A0%B9%E6%8D%AE%E5%AD%97%E6%AE%B5%E5%80%BC%E6%9F%A5%E8%AF%A2%E5%B9%B6%E8%BF%94%E5%9B%9E%E6%9F%90%E4%B8%AA%E5%AD%97%E6%AE%B5%E7%9A%84%E5%80%BC)
+    * [子查询](#%E5%AD%90%E6%9F%A5%E8%AF%A2)
+        * [select](#select)
+        * [buildSql](#buildsql)
+* [数据验证](#%E6%95%B0%E6%8D%AE%E9%AA%8C%E8%AF%81)
+* [数据填充](#%E6%95%B0%E6%8D%AE%E5%A1%AB%E5%85%85)
+* [字段映射](#%E5%AD%97%E6%AE%B5%E6%98%A0%E5%B0%84)
+* [试图模型](#%E8%A7%86%E5%9B%BE%E6%A8%A1%E5%9E%8B)
+* [关联模型](#%E5%85%B3%E8%81%94%E6%A8%A1%E5%9E%8B)
+
 ## 设计理念 ##
 
 ThinkORM名字中带有'ORM'三个字母，可能大家会误以为其和传统ORM的设计思路相似，只是换了一层接口而已。其实，ThinkORM的设计思路和传统ORM的设计思路还是有比较大的区别的，这里就来说明ThinkORM的不同之处。
@@ -47,7 +100,7 @@ ThinkORM名字中带有'ORM'三个字母，可能大家会误以为其和传统O
 
 ## 模型定义 ##
 
-## 链式操作 ##
+## 连贯操作 ##
 
 ## CRUD操作 ##
 
@@ -126,7 +179,7 @@ User.where('age >= 20 AND status = 1').select().then(function(users) {
 
 > ThinkORM在对字符串条件查询时进行了对不安全字符的过滤，但建议用户在使用字符串查询时先进行必要的过滤。
 
-#### 对象查询条件 ####
+#### 对象条件 ####
 
 这是最常用的查询方式，例如：
 
@@ -650,7 +703,7 @@ Model.query('SELECT * FROM __USER__');
 
 #### execute方法 ####
 
-`execute`方法用于写入和更新数据，返回原生结果。它支持的用法同[query](https://github.com/happen-zhang/think-orm#query%E6%96%B9%E6%B3%95)方法。
+`execute`方法用于写入和更新数据，返回原生结果。它支持的用法同[query](#query%E6%96%B9%E6%B3%95)方法。
 
 ### 字段查询 ###
 
@@ -705,7 +758,7 @@ Model.field('id,name').table('user').group('age').where({id: {gt: 5}}).order('st
 
 调用`buildSql`方法后不会进行实际的查询操作，而只是生成该次查询的SQL语句（为了避免混淆，会在SQL两边加上括号），然后我们直接在后续的查询中直接调用，例如：
 
-```
+```Javascript
 var sql = Model.field('id,name').table('user').group('age').where({id: {gt: 5}}).order('status ASC').getBuildSql();
 
 // SELECT * FROM (SELECT `id`,`name` FROM `user` WHERE `id` > 5 GROUP BY age ORDER BY status ASC) aliasname
