@@ -41,7 +41,7 @@ npm install think-orm
 
 * [设计理念](#%E8%AE%BE%E8%AE%A1%E7%90%86%E5%BF%B5)
 * [连接数据库](#%E8%BF%9E%E6%8E%A5%E6%95%B0%E6%8D%AE%E5%BA%93)
-* [连贯操作]()
+* [连贯操作](#%E8%BF%9E%E8%B4%AF%E6%93%8D%E4%BD%9C)
 * [CRUD操作](#crud%E6%93%8D%E4%BD%9C)
     * [数据创建](#%E6%95%B0%E6%8D%AE%E5%88%9B%E5%BB%BA)
     * [数据写入](#%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5)
@@ -51,7 +51,7 @@ npm install think-orm
 * [数据查询](#%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2)
     * [查询方式](#%E6%9F%A5%E8%AF%A2%E6%96%B9%E5%BC%8F)
         * [字符串条件](#%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%9D%A1%E4%BB%B6)
-        * [对象条件]()
+        * [对象条件](#%E5%AF%B9%E8%B1%A1%E6%9D%A1%E4%BB%B6)
     * [表达式查询](#%E6%9F%A5%E8%AF%A2%E8%A1%A8%E8%BE%BE%E5%BC%8F)
         * [EQ](#eq%E7%AD%89%E4%BA%8E)
         * [NEQ](#neq%E4%B8%8D%E7%AD%89%E4%BA%8E)
