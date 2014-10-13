@@ -44,6 +44,7 @@ npm install think-orm
 * [连贯操作](#%E8%BF%9E%E8%B4%AF%E6%93%8D%E4%BD%9C)
     * [where](#where)
     * [table](#table)
+    * [alias](#alias)
 * [CRUD操作](#crud%E6%93%8D%E4%BD%9C)
     * [数据创建](#%E6%95%B0%E6%8D%AE%E5%88%9B%E5%BB%BA)
     * [数据写入](#%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5)
@@ -299,6 +300,20 @@ Model.field('u.name, b.author').table(alias).limit(10).select().then(function(re
 ```
 
 使用对象方式定义的优势是可以避免因为表名和关键字冲突而出错的情况。一般情况下，无需调用`table`方法，默认会自动获取当前模型对应或者定义的数据表。
+
+### alias ###
+
+`alias`用于设置当前数据表的别名，便于使用其他的连贯操作例如`join`方法等。
+
+示例：
+
+```Javascript
+// SELECT * FROM `user` `u`
+User.alias('u').select().then(function(users) {});
+
+// SELECT * FROM `user` `u` INNER JOIN book b ON b.user_id = u.id
+User.alias('u').join('__BOOK__ b ON b.user_id = u.id').select().then(function(result) {});
+```
 
 ## CRUD操作 ##
 
