@@ -43,8 +43,18 @@ npm install think-orm
 * [连接数据库](#%E8%BF%9E%E6%8E%A5%E6%95%B0%E6%8D%AE%E5%BA%93)
 * [连贯操作](#%E8%BF%9E%E8%B4%AF%E6%93%8D%E4%BD%9C)
     * [where](#where)
+        * [字符串参数](#%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%8F%82%E6%95%B0)
+        * [对象参数](#%E5%AF%B9%E8%B1%A1%E5%8F%82%E6%95%B0)
+        * [多次调用where](#%E5%A4%9A%E6%AC%A1%E8%B0%83%E7%94%A8where)
     * [table](#table)
     * [alias](#alias)
+    * [field](#field)
+        * [返回指定的字段](#%E8%BF%94%E5%9B%9E%E6%8C%87%E5%AE%9A%E7%9A%84%E5%AD%97%E6%AE%B5)
+        * [指定写入字段](#%E6%8C%87%E5%AE%9A%E5%86%99%E5%85%A5%E5%AD%97%E6%AE%B5)
+        * [使用SQL函数](#%E4%BD%BF%E7%94%A8sql%E5%87%BD%E6%95%B0)
+        * [字段别名]()
+        * [获取所有字段](#%E8%8E%B7%E5%8F%96%E6%89%80%E6%9C%89%E5%AD%97%E6%AE%B5)
+        * [字段排除](#%E8%8E%B7%E5%8F%96%E6%89%80%E6%9C%89%E5%AD%97%E6%AE%B5)
 * [CRUD操作](#crud%E6%93%8D%E4%BD%9C)
     * [数据创建](#%E6%95%B0%E6%8D%AE%E5%88%9B%E5%BB%BA)
     * [数据写入](#%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5)
@@ -372,7 +382,7 @@ User.field('name, age').where('id = 1').save(user).then(function(result) {});
 User.field('id, SUM(age)').select().then(function(users) {});
 ```
 
-#### 设置字段别名 ####
+#### 字段别名 ####
 
 `field`也可为字段设置别名：
 
