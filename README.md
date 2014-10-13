@@ -52,7 +52,7 @@ npm install think-orm
     * [查询方式](#%E6%9F%A5%E8%AF%A2%E6%96%B9%E5%BC%8F)
         * [字符串条件](#%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%9D%A1%E4%BB%B6)
         * [对象条件](#%E5%AF%B9%E8%B1%A1%E6%9D%A1%E4%BB%B6)
-    * [表达式查询](#%E6%9F%A5%E8%AF%A2%E8%A1%A8%E8%BE%BE%E5%BC%8F)
+    * [查询表达式](#%E6%9F%A5%E8%AF%A2%E8%A1%A8%E8%BE%BE%E5%BC%8F)
         * [EQ](#eq%E7%AD%89%E4%BA%8E)
         * [NEQ](#neq%E4%B8%8D%E7%AD%89%E4%BA%8E)
         * [GT](#gt%E5%A4%A7%E4%BA%8E)
@@ -303,9 +303,9 @@ User.where(conditions).select().then(function(users) {});
 查询表达式就是以对象作为查询条件的一种查询方式，它可以支持比较判断，它的格式类似于下面这种形式：
 
 ```Javascript
-var where = { };
-// where['fieldname'] = { 'expression': 'value' };
-where.fieldname = { 'expression': 'value' };
+var map = { };
+// map['fieldname'] = { 'expression': 'value' };
+map.fieldname = { 'expression': 'value' };
 ```
 
 `expression`部分即为支持可用的表达式键，`value`则为满足条件的值。支持的表达式如下：
@@ -330,22 +330,22 @@ where.fieldname = { 'expression': 'value' };
 例如：
 
 ```Javascript
-// where['id'] = { eq: 23333 };
-where.id = { eq: 23333 };
+// map['id'] = { eq: 23333 };
+map.id = { eq: 23333 };
 ```
 
 或者：
 
 ```Javascript
-// where['id'] = { '=': 23333 };
-where.id = { '=': 23333 };
+// map['id'] = { '=': 23333 };
+map.id = { '=': 23333 };
 ```
 
 和上面的查询等效：
 
 ```Javascript
-// where['id'] = 23333;
-where.id = 23333;
+// map['id'] = 23333;
+map.id = 23333;
 ```
 
 `EQ`表达式生成的SQL语句类似如下：
@@ -360,15 +360,15 @@ User.where({ id: { eq: 23333 } }).select().then(function(user) {});
 例如：
 
 ```Javascript
-// where['id'] = { neq: 23333 };
-where.id = { neq: 23333 };
+// map['id'] = { neq: 23333 };
+map.id = { neq: 23333 };
 ```
 
 或者：
 
 ```Javascript
-// where['id'] = { '<>': 23333 };
-where.id = { '<>': 23333 };
+// map['id'] = { '<>': 23333 };
+map.id = { '<>': 23333 };
 ```
 
 `NEQ`表达式生成的SQL语句类似如下：
@@ -383,15 +383,15 @@ User.where({ id: { neq: 23333 } }).select().then(function(user) {});
 例如：
 
 ```Javascript
-// where['id'] = { gt: 23333 };
-where.id = { gt: 23333 };
+// map['id'] = { gt: 23333 };
+map.id = { gt: 23333 };
 ```
 
 或者：
 
 ```Javascript
-// where['id'] = { '>': 23333 };
-where.id = { '>': 23333 };
+// map['id'] = { '>': 23333 };
+map.id = { '>': 23333 };
 ```
 
 `GT`表达式生成的SQL语句类似如下：
@@ -406,15 +406,15 @@ User.where({ id: { gt: 23333 } }).select().then(function(user) {});
 例如：
 
 ```Javascript
-// where['id'] = { egt: 23333 };
-where.id = { egt: 23333 };
+// map['id'] = { egt: 23333 };
+map.id = { egt: 23333 };
 ```
 
 或者：
 
 ```Javascript
-// where['id'] = { '>=': 23333 };
-where.id = { '>=': 23333 };
+// map['id'] = { '>=': 23333 };
+map.id = { '>=': 23333 };
 ```
 
 `EGT`表达式生成的SQL语句类似如下：
@@ -429,15 +429,15 @@ User.where({ id: { egt: 23333 } }).select().then(function(user) {});
 例如：
 
 ```Javascript
-// where['id'] = { lt: 23333 };
-where.id = { lt: 23333 };
+// map['id'] = { lt: 23333 };
+map.id = { lt: 23333 };
 ```
 
 或者：
 
 ```Javascript
-// where['id'] = { '<': 23333 };
-where.id = { '<': 23333 };
+// map['id'] = { '<': 23333 };
+map.id = { '<': 23333 };
 ```
 
 `LT`表达式生成的SQL语句类似如下：
@@ -452,15 +452,15 @@ User.where({ id: { lt: 23333 } }).select().then(function(user) {});
 例如：
 
 ```Javascript
-// where['id'] = { elt: 23333 };
-where.id = { elt: 23333 };
+// map['id'] = { elt: 23333 };
+map.id = { elt: 23333 };
 ```
 
 或者：
 
 ```Javascript
-// where['id'] = { '<=': 23333 };
-where.id = { '<=': 23333 };
+// map['id'] = { '<=': 23333 };
+map.id = { '<=': 23333 };
 ```
 
 `ELT`表达式生成的SQL语句类似如下：
@@ -476,17 +476,17 @@ User.where({ id: { elt: 23333 } }).select().then(function(user) {});
 
 ```Javascript
 // `name` LIKE '%orm%'
-where.name = { like: '%orm%' };
+map.name = { like: '%orm%' };
 
 // `name` NOT LIKE '%orm%'
-where.name = { notlike: '%orm%' };
+map.name = { notlike: '%orm%' };
 ```
 
 `[NOT]LIKE`也支持多条件形式的模糊查询，它支持`AND`，`OR`和`XOR`的逻辑组合：
 
 ```Javascript
 // `name` LIKE 'orm' OR `name` LIKE '%nodejs%' AND `name` LIKE '_He%' XOR `name` LIKE '%js'
-where.name = {
+map.name = {
     like: {
         or: ['orm', '%nodejs%'],
         and: '_He%',
@@ -503,16 +503,16 @@ where.name = {
 
 ```Javascript
 // `id` BETWEEN 100 AND 200
-where.id = { between: '100, 200' };
+map.id = { between: '100, 200' };
 
 // `id` NOT BETWEEN 100 AND 200
-where.id = { notbetween: '100, 200' };
+map.id = { notbetween: '100, 200' };
 ```
 
 或者使用数组作为区间：
 
 ```Javascript
-where.id = { between: [100, '200'] };
+map.id = { between: [100, '200'] };
 ```
 
 #### [NOT]IN： IN查询 ####
@@ -521,17 +521,17 @@ where.id = { between: [100, '200'] };
 
 ```Javascript
 // `id` IN ('100','200','300','400')
-where.id = { in: '100, 200, 300, 400' };
+map.id = { in: '100, 200, 300, 400' };
 
 // `id` NOT IN ('100','200','300','400')
-where.id = { notin: '100, 200, 300, 400' };
+map.id = { notin: '100, 200, 300, 400' };
 ```
 
 或者使用数组作为IN的条件：
 
 ```Javascript
 // `id` IN (100,'200',300,'400')
-where.id = { in: [100, '200', 300, '400'] };
+map.id = { in: [100, '200', 300, '400'] };
 ```
 
 #### EXP：查询表达式 ####
@@ -539,13 +539,13 @@ where.id = { in: [100, '200', 300, '400'] };
 使用`EXP`能支持更加复杂的查询条件，比如：
 
 ```Javascript
-where.id = { in: '1, 3 , 8' };
+map.id = { in: '1, 3 , 8' };
 ```
 
 可以改成：
 
 ```Javascript
-where.id = { exp: 'IN (1, 3, 8)' };
+map.id = { exp: 'IN (1, 3, 8)' };
 ```
 
 `EXP`查询条件可以是任何有效的SQL语句，包括SQL支持的函数或者是表字段等。`EXP`不仅能供查询使用，而且还能支持数据更新：
@@ -560,32 +560,32 @@ User.where({ id: 1 }).save({ score: { exp: 'score+1' } }).then(function() {});
 快捷查询方式是一种多字段查询的简化写法，可以进一步简化查询条件的写法，在多个字段之间用`|`分割表示`OR`查询，用`&`分割表示`AND`查询。例如：
 
 ```Javascript
-where['name|title'] = 'orm';
+map['name|title'] = 'orm';
 
 // SELECT * FROM `user` WHERE (`name` = 'orm' OR `title` = 'orm')
-User.where(where).select().then(function() {});
+User.where(map).select().then(function() {});
 ```
 
 当然，使用`&`或`|`快捷查询支持为不同字段指定不同条件的情况：
 
 ```Javascript
 // `name` LIKE '%orm%' OR `age` = 12 OR `score` > 3
-where['name|age|score'] = [{ like: '%orm%' }, 12, { gt: 3 }];
+map['name|age|score'] = [{ like: '%orm%' }, 12, { gt: 3 }];
 ```
 
 上面的形式等价于：
 
 ```Javascript
-where.name = { like: '%orm%' };
-where.age = 12;
-where.score = { gt: 3 };
+map.name = { like: '%orm%' };
+map.age = 12;
+map.score = { gt: 3 };
 ```
 
 `&`和`|`可以混合使用，但这种使用方式只能支持单一条件，即所有字段都只能应用同一个条件，例如：
 
 ```Javascript
 // `name` LIKE 'orm' AND `title` LIKE 'orm' OR `address` LIKE 'orm'
-where['name&title|address'] = { like: 'orm' };
+map['name&title|address'] = { like: 'orm' };
 ```
 
 > 快捷查询为不同字段指定不同条件时，不能把'|'和'&'混用。需要注意的是，不同字段所对应的条件是按照出现的顺序来赋值的。
@@ -596,14 +596,14 @@ ThinkORM支持对某些字段进行区间查询，例如：
 
 ```Javascript
 // `id` > 10 AND `id` < 30
-where.id = [{ gt: 10 }, { lt: 30 }];
+map.id = [{ gt: 10 }, { lt: 30 }];
 ```
 
 区间查询也可以支持`OR`和`XOR`逻辑：
 
 ```Javascript
 // `id` > 10 OR `id` < 30
-where.id = [{ gt: 10 }, { lt: 30 }, 'OR'];
+map.id = [{ gt: 10 }, { lt: 30 }, 'OR'];
 ```
 
 > 逻辑操作符AND，OR和XOR只能作为数组的最后一个元素，默认是AND。
@@ -612,7 +612,7 @@ where.id = [{ gt: 10 }, { lt: 30 }, 'OR'];
 
 ```Javascript
 // `name` LIKE '%orm%' OR `name` = 'nodejs' OR `name` = 'think'
-where.name = [{ like: '%orm%' }, 'nodejs', 'think', 'OR'];
+map.name = [{ like: '%orm%' }, 'nodejs', 'think', 'OR'];
 ```
 
 ### 组合查询 ###
@@ -624,12 +624,12 @@ where.name = [{ like: '%orm%' }, 'nodejs', 'think', 'OR'];
 对象条件可以和字符串条件混用（`_string`作为查询条件），例如：
 
 ```Javascript
-where.id = { gt: 100 };
-where.name = 'orm';
-where._string = 'status=1 AND score>10';
+map.id = { gt: 100 };
+map.name = 'orm';
+map._string = 'status=1 AND score>10';
 
 // SELECT * FROM `user` WHERE `id` > 100 OR `name` = 'orm' OR (status=1 AND score>10)
-User.where(where).select().then(funciton(users) {});
+User.where(map).select().then(funciton(users) {});
 ```
 
 #### 请求字符串查询 ####
@@ -637,11 +637,11 @@ User.where(where).select().then(funciton(users) {});
 请求字符串查询是一种类似于URL传参的方式，可以支持简单的条件相等判断。
 
 ```Javascript
-where.id = { gt: 100 };
-where._query = 'status=1&score=100&_logic=or';
+map.id = { gt: 100 };
+map._query = 'status=1&score=100&_logic=or';
 
 // SELECT * FROM `user` WHERE `id` > 100 AND (`status`='1' OR `score`='100')
-User.where(where).select().then(funciton(users) {});
+User.where(map).select().then(funciton(users) {});
 ```
 
 #### 复合查询 ####
@@ -649,12 +649,16 @@ User.where(where).select().then(funciton(users) {});
 复合查询相当于封装了一个新的查询条件，然后并入原来的查询条件之中，所以可以完成比较复杂的查询条件组装。 例如：
 
 ```Javascript
-where.name = { like: '%thinkorm%' };
-where.title = { like: '%nodejs%' };
-where._logic = 'OR';
+var where = {
+    name: { like: '%thinkorm%' },
+    title: { like: '%nodejs%' },
+    _logic: 'OR'
+};
 
-map.id = { gt: 1 };
-map._complex = where;
+var map = {
+    id: { gt: 1 },
+    _complex: where
+};
 
 // SELECT * FROM `post` WHERE `id` > 1 AND (`name` LIKE '%thinkorm%' OR `title` LIKE '%nodejs%')
 Post.where(map).select().then(function(posts) {});
@@ -663,8 +667,10 @@ Post.where(map).select().then(function(posts) {});
 复合查询使用了`_complex`作为子查询条件来定义，配合之前的查询方式，可以非常灵活的制定更加复杂的查询条件。 很多查询方式可以相互转换，例如上面的查询条件可以改成：
 
 ```Javascript
-where.id = { gt: 1 };
-where._string = "name LIKE '%thinkorm%' OR title LIKE '%nodejs%'";
+var map = {
+    id: { gt: 1 },
+    _string: "name LIKE '%thinkorm%' OR title LIKE '%nodejs%'"
+};
 ```
 
 这个结果和使用`_complex`的例子是一样的。
