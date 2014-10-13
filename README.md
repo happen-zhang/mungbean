@@ -42,6 +42,7 @@ npm install think-orm
 * [设计理念](#%E8%AE%BE%E8%AE%A1%E7%90%86%E5%BF%B5)
 * [连接数据库](#%E8%BF%9E%E6%8E%A5%E6%95%B0%E6%8D%AE%E5%BA%93)
 * [连贯操作](#%E8%BF%9E%E8%B4%AF%E6%93%8D%E4%BD%9C)
+    * [where](#where)
 * [CRUD操作](#crud%E6%93%8D%E4%BD%9C)
     * [数据创建](#%E6%95%B0%E6%8D%AE%E5%88%9B%E5%BB%BA)
     * [数据写入](#%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5)
@@ -169,6 +170,79 @@ User.where({ name: { like: 'orm' } }).save({ name: 'hello' }).then(function(resu
 | index | 数据索引 | String |
 
 > 所有的连贯操作都返回当前的模型实例对象（this），其中where，join，union，scope方法支持多次调用。
+
+### where ###
+
+`where`方法的是进行条件查询最常用的方法了，基本上所有带条件的查询都需要调用到`where`方法。它可以完成包括普通查询、表达式查询、快捷查询、区间查询、组合查询在内的查询操作。`where`方法的参数支持字符串和对象，但大部分情况下建议使用对象参数。
+
+#### 字符串参数 ####
+
+```Javascript
+// SELECT * FROM `user` WHERE (status=1 AND score>10)
+User.where('status=1 AND score>10').select().then(function(users) {});
+```
+
+使用字符串条件的时候，可以配合预处理机制，例如：
+
+```Javascript
+// SELECT * FROM `user` WHERE (id=1 AND name like 'orm')
+User.where('id=%d AND name LIKE %s', 1, 'orm').select().then(function(users) {});
+```
+
+或者：
+
+```Javascript
+User.where('id=%d AND name LIKE %s', [1, 'orm']).select().then(function(users) {});
+```
+
+字符串预处理格式类型支持指定数字、字符串等，具体可以参考[node.js的util.format](http://nodejs.org/api/util.html#util_util_format_format)方法所支持的格式。
+
+#### 对象参数 ####
+
+大部分情况下支持`where`方法的对象参数用法。
+
+最简单的对象参数用法就是直接赋值，例如：
+
+```Javascript
+var map = {
+    id: 1,
+    name: 'hello'
+};
+
+// SELECT * FROM `user` WHERE `id` = 1 AND `name` = 'hello'
+User.where(map).select().then(function(users) {});
+```
+
+上面的查询条件仅仅是一个简单的相等判断，除此之外还可用更加灵活多用的表达式查询来支持更多的SQL查询语法，查询表达式的使用格式如下：
+
+```Javascript
+var map = {
+    fieldA: {
+        expressionA: conditionA
+    },
+
+    fieldB: {
+        expressionB: conditionB
+    }
+};
+
+Model.where(map).select().then(function(result) {});
+```
+
+更多关于表达式查询，可以查看：[查询表达式](#%E6%9F%A5%E8%AF%A2%E8%A1%A8%E8%BE%BE%E5%BC%8F)。
+
+#### 多次调用where ####
+
+`where`方法支持多次调用，但字符串条件只能出现一次，例如：
+
+```Javascript
+// SELECT * FROM `user` WHERE (id >= 1) AND `name` = 'hello' AND `age` = 20
+User.where('id >= 1').where({ name: 'hello' }).where({ age: 20 }).select().then(function(users) {});
+```
+
+多次的数组条件表达式会最终合并，但字符串条件则只支持一次。
+
+更多的查询用法，可以参考：[数据查询](#%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2)部分。
 
 ## CRUD操作 ##
 
