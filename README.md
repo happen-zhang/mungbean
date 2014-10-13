@@ -244,6 +244,61 @@ User.where('id >= 1').where({ name: 'hello' }).where({ age: 20 }).select().then(
 
 更多的查询用法，可以参考：[数据查询](#%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2)部分。
 
+### table ###
+
+`table`方法也属于模型类的连贯操作方法之一，主要用于指定操作的数据表。
+
+一般情况下，操作模型的时候系统能够自动识别当前对应的数据表，所以，使用`table`方法的情况通常是为了：
+
+* 切换操作的数据表
+* 对多表进行操作
+
+例如：
+
+```Javascript
+// SELECT * FROM `book` WHERE (id >= 1)
+Model.table('book').where('id >= 1').select().then(function(books) {});
+```
+
+当然，如果需要的话，也可以在`table`方法中指定数据库，例如：
+
+```Javascript
+// SELECT * FROM test.book
+Model.table('test.book').select().then(function(books) {});
+```
+
+`table`方法指定的数据表需要完整的表名，但可以采用下面的方式简化数据表前缀的传入，例如：
+
+```Javascript
+// SELECT * FROM `book`
+Model.table('__BOOK__').select().then(function(books) {});
+```
+
+`table`方法中使用`__TABLENAME__`字符串的形式时，会自动获取当前模型对应的数据表前缀（如果有定义前缀的话）来生成数据表名称。
+
+需要注意的是`table`方法不会改变数据库的连接，所以你要确保当前连接的用户有权限操作相应的数据库和数据表。
+
+如果需要对多表进行操作，可以这样使用：
+
+```Javascript
+// SELECT u.name,b.author FROM user u,book b
+Model.field('u.name, b.author').table('user u, book b').select().then(function(result) {});
+```
+
+为了尽量避免和`Mysql`的关键字冲突，可以使用对象的方式定义，例如：
+
+```Javascript
+var alias = {
+    user: 'u',
+    book: 'b'
+};
+
+// SELECT u.name,b.author FROM `user` AS `u`,`book` AS `b` LIMIT 10
+Model.field('u.name, b.author').table(alias).limit(10).select().then(function(result) {});
+```
+
+使用对象方式定义的优势是可以避免因为表名和关键字冲突而出错的情况。一般情况下，无需调用`table`方法，默认会自动获取当前模型对应或者定义的数据表。
+
 ## CRUD操作 ##
 
 ### 数据创建 ###
