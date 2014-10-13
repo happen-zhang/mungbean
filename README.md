@@ -315,6 +315,119 @@ User.alias('u').select().then(function(users) {});
 User.alias('u').join('__BOOK__ b ON b.user_id = u.id').select().then(function(result) {});
 ```
 
+### field ###
+
+`field`方法属于模型的连贯操作方法之一，主要目的是指定要返回或者操作的字段，可以用于查询和写入操作。
+
+`field`方法支持字符串或者数组作为参数。
+
+#### 返回指定的字段 ####
+
+在查询操作中，`field`方法是十分常用的。例如，只取出`User`模型对应表中的`id`, `name`和`age`字段：
+
+```Javascript
+// SELECT `id`,`name`,`age` FROM `user`
+// User.field(['id', 'name', 'age']).select().then(function(users) {});
+User.field('id, name, age').select().then(function(users) {});
+```
+
+#### 指定写入字段 ####
+
+除了查询操作之外，`field`方法还有一个非常重要的安全功能——字段合法性检测。`field`方法结合[create]()方法使用就可以完成对字段的合法性检测。例如：
+
+```Javascript
+var user = {
+    id: 100,
+    name: 'hello',
+    age: 18,
+    nickname: 'world'
+};
+
+User.field('name, age, gender').create(user).then(function(user) {
+    //  { name: 'hello', age: 18 }
+    console.log(user);
+});
+```
+
+上面表示合法字段只有`name`，`age`和`gender`字段，`id`和`nickname`字段将会被屏蔽。
+
+同样的，`field`也可以结合`add`和`save`方法，进行字段过滤，例如：
+
+```Javascript
+// INSERT INTO `user` (`name`,`age`) VALUES ('hello',18)
+User.field('name, age').add(user).then(function(result) {});
+
+// UPDATE `user` SET `name`='hello',`age`=18 WHERE (id = 1)
+User.field('name, age').where('id = 1').save(user).then(function(result) {});
+```
+
+在`field`中没有指定的字段会被过滤掉。
+
+#### 使用SQL函数 ####
+
+在`field`方法中可以直接使用SQL中的函数，例如：
+
+```Javascript
+// SELECT `id`,SUM(age) FROM `user`
+User.field('id, SUM(age)').select().then(function(users) {});
+```
+
+#### 设置字段别名 ####
+
+`field`也可为字段设置别名：
+
+```Javascript
+// SELECT `id`,name AS nickname FROM `user`
+// User.field({ id: 'id', name: 'nickname' }).select().then(function(users) {});
+User.field('id, name AS nickname').select().then(function(users) {});
+```
+
+也可能会有更复杂的别名定义，例如：
+
+```Javascript
+// SELECT `id` AS `id`,CONCAT(name, '-', id) AS `truename`,AVG(age) AS `age` FROM `user`
+User.field({ id: 'id', "CONCAT(name, '-', id)": 'truename', 'AVG(age)': 'age' }).select().then(function(users) {});
+```
+
+#### 获取所有字段 ####
+
+如果有一个表有非常多的字段，需要获取所有的字段（这个也许很简单，因为不调用`field`方法或者直接使用空的`field`方法都能做到），例如：
+
+```Javascript
+// SELECT * FROM `user`
+User.select().then(function(users) {});
+
+User.field().select().then(function(users) {});
+
+User.field('*').select().then(function(users) {});
+```
+
+以上三个用法的结果都是一样的。
+
+如果希望显式的调用所有字段（对于对性能要求比较高的系统，这个要求并不过分，起码是一个比较好的习惯），`field`方法仍然能够实现，下面的用法可以完成预期的作用：
+
+```Javascript
+// SELECT `id`,`name`,`age`,`gender`,`score`,`status`,`created_at` FROM `user`
+User.field(true).select().then(function(users) {});
+```
+
+`field(true)`的用法会显式的获取数据表的所有字段列表，哪怕数据表中有再多的字段。
+
+#### 字段排除 ####
+
+如果在某次查询中不希望获取某些字段（如`article`表中存放文章内容的`content`字段）之外的所有字段值（假设包含`id`，`title`，`author`字段），我们就可以使用`field`方法的排除功能，例如下面的方式就可以实现所说的功能：
+
+```Javascript
+// SELECT `id`,`title`,`author` FROM `article`
+Article.field('content', true).select().then(function(articles) {});
+
+// SELECT `id`,`title` FROM `article`
+// Article.field(['content', 'author'], true).select().then(function(articles) {});
+Article.field('content, author', true).select().then(function(articles) {});
+```
+
+> 当然，除了select方法之外，所有的查询方法，包括find等都可以使用field方法，这里只是以select为例说明。
+
 ## CRUD操作 ##
 
 ### 数据创建 ###
