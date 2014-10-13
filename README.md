@@ -49,10 +49,11 @@ npm install think-orm
     * [table](#table)
     * [alias](#alias)
     * [field](#field)
+    * [order](#order)
         * [返回指定的字段](#%E8%BF%94%E5%9B%9E%E6%8C%87%E5%AE%9A%E7%9A%84%E5%AD%97%E6%AE%B5)
         * [指定写入字段](#%E6%8C%87%E5%AE%9A%E5%86%99%E5%85%A5%E5%AD%97%E6%AE%B5)
         * [使用SQL函数](#%E4%BD%BF%E7%94%A8sql%E5%87%BD%E6%95%B0)
-        * [字段别名]()
+        * [字段别名](#%E5%AD%97%E6%AE%B5%E5%88%AB%E5%90%8D)
         * [获取所有字段](#%E8%8E%B7%E5%8F%96%E6%89%80%E6%9C%89%E5%AD%97%E6%AE%B5)
         * [字段排除](#%E8%8E%B7%E5%8F%96%E6%89%80%E6%9C%89%E5%AD%97%E6%AE%B5)
 * [CRUD操作](#crud%E6%93%8D%E4%BD%9C)
@@ -437,6 +438,33 @@ Article.field('content, author', true).select().then(function(articles) {});
 ```
 
 > 当然，除了select方法之外，所有的查询方法，包括find等都可以使用field方法，这里只是以select为例说明。
+
+#### order ####
+
+`order`方法属于模型的连贯操作方法之一，用于对操作的结果排序。
+
+```Javascript
+// SELECT * FROM `user` WHERE (status = 1) ORDER BY id desc LIMIT 5
+User.where('status = 1').order('id desc').limit(5).select().then(function(users) {});
+```
+
+> 注意：连贯操作方法没有顺序，可以在select方法调用之前随便改变调用顺序。
+
+支持多个字段排序，例如：
+
+```Javascript
+// SELECT * FROM `user` WHERE (status = 1) ORDER BY id DESC, age ASC LIMIT 5
+User.where('status = 1').order('id DESC, age ASC').limit(5).select().then(function(users) {});
+```
+
+> 如果没有指定desc或者asc排序规则的话，默认为asc。
+
+如果字段和`Mysql`关键字有冲突，那么建议采用对象的方式调用，例如：
+
+```Javascript
+// SELECT * FROM `user` WHERE (status=1) ORDER BY `id` desc,`age` asc
+User.where('status=1').order({ id: 'desc', age: 'asc' }).select().then(function(users) {});
+```
 
 ## CRUD操作 ##
 
