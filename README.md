@@ -57,6 +57,8 @@ npm install think-orm
         * [字段排除](#%E8%8E%B7%E5%8F%96%E6%89%80%E6%9C%89%E5%AD%97%E6%AE%B5)
     * [order](#order)
     * [limit](#limit)
+        * [限制结果数量](#%E9%99%90%E5%88%B6%E7%BB%93%E6%9E%9C%E6%95%B0%E9%87%8F)
+        * [分页查询](#%E5%88%86%E9%A1%B5%E6%9F%A5%E8%AF%A2)
 * [CRUD操作](#crud%E6%93%8D%E4%BD%9C)
     * [数据创建](#%E6%95%B0%E6%8D%AE%E5%88%9B%E5%BB%BA)
     * [数据写入](#%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5)
@@ -498,6 +500,45 @@ User.limit('10, 30').select().then(function(users) {});
 ```
 
 对于大数据表，尽量使用`limit`限制查询结果，否则会导致很大的内存开销和性能问题。
+
+### page ###
+
+`page`方法也是模型的连贯操作方法之一，是完全为分页查询而诞生的一个人性化操作方法。
+
+我们在前面已经了解了关于`limit`方法用于分页查询的情况，而`page`方法则是更人性化的进行分页查询的方法，例如还是以`User`列表分页为例来说，如果使用`limit`方法，我们要查询第一页和第二页（假设我们每页输出10条数据）写法如下：
+
+```Javascipt
+// 第一页记录
+User.limit('0, 10').select(then(users) {});
+
+// 第二页记录
+User.limit('10, 10').select(then(users) {});
+```
+
+虽然利用`limit`方法也能实现分页的效果，但是这样做还需要手动计算记录的起始行数，稍微麻烦一点。如果用`page`方法来写则简单多了，例如：
+
+```Javascipt
+// SELECT * FROM `user` LIMIT 0,10
+User.page('1, 10').select(then(users) {});
+
+// SELECT * FROM `user` LIMIT 10,10
+// User.page(2, 10).select(then(users) {});
+User.page('2, 10').select(then(users) {});
+```
+
+显而易见的是，使用`page`方法你不需要计算每个分页数据的起始位置，`page`方法内部会自动计算。
+
+`page`方法可以和`limit`方法配合使用，例如：
+
+```Javascipt
+// SELECT * FROM `user` LIMIT 20,10
+User.limit(10).page(3).select().then(function(users) {});
+
+// 和上面的结果相同
+User.page(3, 10).select().then(function(users) {});
+```
+
+当`page`方法只有一个值传入的时候，表示第几页，而`limit`方法则用于设置每页显示的数量。
 
 ## CRUD操作 ##
 
