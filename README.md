@@ -49,13 +49,14 @@ npm install think-orm
     * [table](#table)
     * [alias](#alias)
     * [field](#field)
-    * [order](#order)
         * [返回指定的字段](#%E8%BF%94%E5%9B%9E%E6%8C%87%E5%AE%9A%E7%9A%84%E5%AD%97%E6%AE%B5)
         * [指定写入字段](#%E6%8C%87%E5%AE%9A%E5%86%99%E5%85%A5%E5%AD%97%E6%AE%B5)
         * [使用SQL函数](#%E4%BD%BF%E7%94%A8sql%E5%87%BD%E6%95%B0)
         * [字段别名](#%E5%AD%97%E6%AE%B5%E5%88%AB%E5%90%8D)
         * [获取所有字段](#%E8%8E%B7%E5%8F%96%E6%89%80%E6%9C%89%E5%AD%97%E6%AE%B5)
         * [字段排除](#%E8%8E%B7%E5%8F%96%E6%89%80%E6%9C%89%E5%AD%97%E6%AE%B5)
+    * [order](#order)
+    * [limit](#limit)
 * [CRUD操作](#crud%E6%93%8D%E4%BD%9C)
     * [数据创建](#%E6%95%B0%E6%8D%AE%E5%88%9B%E5%BB%BA)
     * [数据写入](#%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5)
@@ -465,6 +466,38 @@ User.where('status = 1').order('id DESC, age ASC').limit(5).select().then(functi
 // SELECT * FROM `user` WHERE (status=1) ORDER BY `id` desc,`age` asc
 User.where('status=1').order({ id: 'desc', age: 'asc' }).select().then(function(users) {});
 ```
+
+### limit ###
+
+`limit`方法也是模型类的连贯操作方法之一，主要用于指定查询和操作的数量，特别在分页查询的时候使用较多。
+
+#### 限制结果数量 ####
+
+例如从`User`中获取满足`status=1`的10条数据，如下调用即可：
+
+```Javascript
+// SELECT * FROM `user` WHERE (status = 1) LIMIT 10
+User.where('status = 1').limit(10).select().then(function(users) {});
+```
+
+`limit`方法也可以用于写操作。例如，更新满足`score > 100`的3条数据：
+
+```Javascript
+// UPDATE `user` SET `age`=18 WHERE (score > 100) LIMIT 3
+User.where('score > 100').limit(3).save({ level: 'A' }).then(function(result) {});
+```
+
+#### 分页查询 ####
+
+使用`limit`方法可以支持分页查询。例如，从第10条记录开始，取出30条记录：
+
+```Javascript
+// SELECT * FROM `user` LIMIT 10,30
+// User.limit(10, 30).select().then(function(users) {});
+User.limit('10, 30').select().then(function(users) {});
+```
+
+对于大数据表，尽量使用`limit`限制查询结果，否则会导致很大的内存开销和性能问题。
 
 ## CRUD操作 ##
 
