@@ -64,6 +64,7 @@ npm install think-orm
     * [having](#having)
     * [join](#join)
     * [union](#union)
+    * [distinct](#distinct)
 * [CRUD操作](#crud%E6%93%8D%E4%BD%9C)
     * [数据创建](#%E6%95%B0%E6%8D%AE%E5%88%9B%E5%BB%BA)
     * [数据写入](#%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5)
@@ -616,7 +617,7 @@ Book.join('RIGHT JOIN __USER__ ON __BOOK__.user_id = __USER__.id').select().then
 Book.join('__USER__ ON __BOOK__.user_id = __USER__.id', 'RIGHT').select().then(function(result) {});
 ```
 
-> join方法的第二个参数支持的类型包括：**INNER** **LEFT** **RIGHT** **FULL**。
+> join方法的第二个参数支持的类型包括：INNER，LEFT，RIGHT，FULL。
 
 如果`join`方法的参数用数组的话，只能使用一次`join`方法，并且不能和字符串方式混合使用。
 
@@ -676,6 +677,17 @@ User.union(['SELECT * FROM book', 'SELECT * FROM user_book'], true).select().the
 每个`union`方法相当于一个独立的`SELECT`语句。
 
 > UNION 内部的 SELECT 语句必须拥有相同数量的列。列也必须拥有相似的数据类型。同时，每条 SELECT 语句中的列的顺序必须相同。
+
+### distinct ###
+
+`distinct`方法用于返回唯一不同的值，例如。
+
+```Javascript
+// SELECT DISTINCT `name` FROM `user`
+User.distinct(true).field('name').select().then(function(result) {});
+```
+
+`distinct`方法的参数是`Boolean`类型。
 
 ## CRUD操作 ##
 
