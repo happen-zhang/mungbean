@@ -66,6 +66,7 @@ npm install think-orm
     * [union](#union)
     * [distinct](#distinct)
     * [lock](#lock)
+    * [comment](#comment)
 * [CRUD操作](#crud%E6%93%8D%E4%BD%9C)
     * [数据创建](#%E6%95%B0%E6%8D%AE%E5%88%9B%E5%BB%BA)
     * [数据写入](#%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5)
@@ -699,6 +700,15 @@ lock(true);
 ```
 
 就会自动在生成的SQL语句最后加上`FOR UPDATE`。
+
+### comment ###
+
+`comment`方法 用于在生成的SQL语句中添加注释内容，例如：
+
+```Javascript
+// SELECT `id`,`name` FROM `user` WHERE (score >= 100) /* Find users whose score equal or greater 100. */
+User.field('id, name').where('score >= 100').comment('Find users whose score equal or greater 100.').select().then(function(users) {});
+```
 
 ## CRUD操作 ##
 
