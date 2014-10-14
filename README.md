@@ -59,6 +59,8 @@ npm install think-orm
     * [limit](#limit)
         * [限制结果数量](#%E9%99%90%E5%88%B6%E7%BB%93%E6%9E%9C%E6%95%B0%E9%87%8F)
         * [分页查询](#%E5%88%86%E9%A1%B5%E6%9F%A5%E8%AF%A2)
+    * [page](#page)
+    * [group](#group)
 * [CRUD操作](#crud%E6%93%8D%E4%BD%9C)
     * [数据创建](#%E6%95%B0%E6%8D%AE%E5%88%9B%E5%BB%BA)
     * [数据写入](#%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5)
@@ -539,6 +541,24 @@ User.page(3, 10).select().then(function(users) {});
 ```
 
 当`page`方法只有一个值传入的时候，表示第几页，而`limit`方法则用于设置每页显示的数量。
+
+### group ###
+
+`group`方法也是连贯操作方法之一，通常用于结合合计函数，根据一个或多个列对结果集进行分组 。
+
+`group`方法只有一个参数，并且只能使用字符串。
+
+```Javascript
+// SELECT `name`,`author` FROM `book` GROUP BY `user_id`
+Book.field('name, author').group('user_id').select().then(function(users) {});
+```
+
+`group`也可以支持多字段分组，例如：
+
+```Javascript
+// SELECT `name`,`author` FROM `book` GROUP BY `user_id`, `created_at`
+Book.field('name, author').group('user_id, created_at').select().then(function(users) {});
+```
 
 ## CRUD操作 ##
 
