@@ -47,6 +47,7 @@ npm install think-orm
         * [对象参数](#%E5%AF%B9%E8%B1%A1%E5%8F%82%E6%95%B0)
         * [多次调用where](#%E5%A4%9A%E6%AC%A1%E8%B0%83%E7%94%A8where)
     * [table](#table)
+    * data
     * [alias](#alias)
     * [field](#field)
         * [返回指定的字段](#%E8%BF%94%E5%9B%9E%E6%8C%87%E5%AE%9A%E7%9A%84%E5%AD%97%E6%AE%B5)
@@ -66,7 +67,10 @@ npm install think-orm
     * [union](#union)
     * [distinct](#distinct)
     * [lock](#lock)
+    * cache
     * [comment](#comment)
+    * relation
+    * index
 * [CRUD操作](#crud%E6%93%8D%E4%BD%9C)
     * [数据创建](#%E6%95%B0%E6%8D%AE%E5%88%9B%E5%BB%BA)
     * [数据写入](#%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5)
