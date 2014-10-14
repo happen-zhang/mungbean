@@ -61,6 +61,7 @@ npm install think-orm
         * [分页查询](#%E5%88%86%E9%A1%B5%E6%9F%A5%E8%AF%A2)
     * [page](#page)
     * [group](#group)
+    * [having](#having)
 * [CRUD操作](#crud%E6%93%8D%E4%BD%9C)
     * [数据创建](#%E6%95%B0%E6%8D%AE%E5%88%9B%E5%BB%BA)
     * [数据写入](#%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5)
@@ -550,14 +551,25 @@ User.page(3, 10).select().then(function(users) {});
 
 ```Javascript
 // SELECT `name`,`author` FROM `book` GROUP BY `user_id`
-Book.field('name, author').group('user_id').select().then(function(users) {});
+Book.field('name, author').group('user_id').select().then(function(books) {});
 ```
 
 `group`也可以支持多字段分组，例如：
 
 ```Javascript
 // SELECT `name`,`author` FROM `book` GROUP BY `user_id`, `created_at`
-Book.field('name, author').group('user_id, created_at').select().then(function(users) {});
+Book.field('name, author').group('user_id, created_at').select().then(function(books) {});
+```
+
+### having ###
+
+`having`方法也是连贯操作之一，用于配合`group`方法完成从分组的结果中筛选（通常是聚合条件）数据。
+
+`having`方法只有一个参数，并且只能使用字符串，例如：
+
+```Javascript
+// SELECT `name`,`author` FROM `book` GROUP BY `user_id` HAVING COUNT(number) > 3
+Book.field('name, author').group('user_id').having('COUNT(number) > 3').select().then(function(books) {});
 ```
 
 ## CRUD操作 ##
