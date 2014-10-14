@@ -62,6 +62,7 @@ npm install think-orm
     * [page](#page)
     * [group](#group)
     * [having](#having)
+    * [join](#join)
 * [CRUD操作](#crud%E6%93%8D%E4%BD%9C)
     * [数据创建](#%E6%95%B0%E6%8D%AE%E5%88%9B%E5%BB%BA)
     * [数据写入](#%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5)
@@ -570,6 +571,64 @@ Book.field('name, author').group('user_id, created_at').select().then(function(b
 ```Javascript
 // SELECT `name`,`author` FROM `book` GROUP BY `user_id` HAVING COUNT(number) > 3
 Book.field('name, author').group('user_id').having('COUNT(number) > 3').select().then(function(books) {});
+```
+
+### join ###
+
+`join`方法也是连贯操作方法之一，用于根据两个或多个表中的列之间的关系，从这些表中查询数据。
+
+`join`通常有下面几种类型，不同类型的`join`操作会影响返回的数据结果。
+
+* `INNER JOIN`: 如果表中有至少一个匹配，则返回行，等同于`JOIN`
+* `LEFT JOIN`: 即使右表中没有匹配，也从左表返回所有的行
+* `RIGHT JOIN`: 即使左表中没有匹配，也从右表返回所有的行
+* `FULL JOIN`: 只要其中一个表中存在匹配，就返回行
+
+`join`方法可以支持以上四种类型，例如：
+
+```Javascript
+// SELECT * FROM `orm_user_book` INNER JOIN orm_user ON orm_user_book.user_id = orm_user.id INNER JOIN orm_book ON orm_user_book.book_id = orm_book.id
+UserBook.join('orm_user ON orm_user_book.user_id = orm_user.id').join('orm_book ON orm_user_book.book_id = orm_book.id').select().then(function(result) {});
+```
+
+`join`方法支持多次调用，但指定的数据表必须是全称，但我们可以这样来定义：
+
+```Javascript
+// 假设前缀为'orm_'
+// SELECT * FROM `orm_book` INNER JOIN orm_user ON orm_book.user_id = orm_user.id
+Book.join('__USER__ ON __BOOK__.user_id = __USER__.id').select().then(function(result) {});
+```
+
+上面例子中的`__USER__`和`__BOOK__`会被分别解析为全表名`orm_user`和`orm_book`（这里假设前缀为`orm_`）。
+
+默认采用`INNER JOIN`方式，如果需要用其他的`JOIN`方式，可以改成
+
+```Javascript
+// SELECT * FROM `book` RIGHT JOIN user ON book.user_id = user.id
+Book.join('RIGHT JOIN __USER__ ON __BOOK__.user_id = __USER__.id').select().then(function(result) {});
+```
+
+或者：
+
+```Javascript
+// SELECT * FROM `book` RIGHT JOIN user ON book.user_id = user.id
+Book.join('__USER__ ON __BOOK__.user_id = __USER__.id', 'RIGHT').select().then(function(result) {});
+```
+
+> join方法的第二个参数支持的类型包括：INNER LEFT RIGHT FULL。
+
+如果`join`方法的参数用数组的话，只能使用一次`join`方法，并且不能和字符串方式混合使用。
+
+```Javascript
+// SELECT * FROM `user_book` INNER JOIN user ON user_book.user_id = user.id INNER JOIN book ON user_book.book_id = book.id
+UserBook.join(['user ON user_book.user_id = user.id', 'book ON user_book.book_id = book.id']).select().then(function(result) {});
+```
+
+使用数组方式的情况下，第二个参数无效。因此必须在字符串中显式定义`join`类型，例如：
+
+```Javascript
+// SELECT * FROM `user_book` RIGHT JOIN user ON user_book.user_id = user.id LEFT JOIN book ON user_book.book_id = book.id
+UserBook.join(['RIGHT JOIN user ON user_book.user_id = user.id', 'LEFT JOIN book ON user_book.book_id = book.id']).select().then(function(result) {});
 ```
 
 ## CRUD操作 ##
