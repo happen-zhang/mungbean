@@ -65,6 +65,7 @@ npm install think-orm
     * [join](#join)
     * [union](#union)
     * [distinct](#distinct)
+    * [lock](#lock)
 * [CRUD操作](#crud%E6%93%8D%E4%BD%9C)
     * [数据创建](#%E6%95%B0%E6%8D%AE%E5%88%9B%E5%BB%BA)
     * [数据写入](#%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5)
@@ -688,6 +689,16 @@ User.distinct(true).field('name').select().then(function(result) {});
 ```
 
 `distinct`方法的参数是`Boolean`类型。
+
+### lock ###
+
+`lock`方法是用于数据库的锁机制，如果在查询或者执行操作的时候使用：
+
+```Javascript
+lock(true);
+```
+
+就会自动在生成的SQL语句最后加上`FOR UPDATE`。
 
 ## CRUD操作 ##
 
