@@ -63,6 +63,7 @@ npm install think-orm
     * [group](#group)
     * [having](#having)
     * [join](#join)
+    * [union](#union)
 * [CRUD操作](#crud%E6%93%8D%E4%BD%9C)
     * [数据创建](#%E6%95%B0%E6%8D%AE%E5%88%9B%E5%BB%BA)
     * [数据写入](#%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5)
@@ -615,7 +616,7 @@ Book.join('RIGHT JOIN __USER__ ON __BOOK__.user_id = __USER__.id').select().then
 Book.join('__USER__ ON __BOOK__.user_id = __USER__.id', 'RIGHT').select().then(function(result) {});
 ```
 
-> join方法的第二个参数支持的类型包括：INNER LEFT RIGHT FULL。
+> join方法的第二个参数支持的类型包括：**INNER** **LEFT** **RIGHT** **FULL**。
 
 如果`join`方法的参数用数组的话，只能使用一次`join`方法，并且不能和字符串方式混合使用。
 
@@ -630,6 +631,51 @@ UserBook.join(['user ON user_book.user_id = user.id', 'book ON user_book.book_id
 // SELECT * FROM `user_book` RIGHT JOIN user ON user_book.user_id = user.id LEFT JOIN book ON user_book.book_id = book.id
 UserBook.join(['RIGHT JOIN user ON user_book.user_id = user.id', 'LEFT JOIN book ON user_book.book_id = book.id']).select().then(function(result) {});
 ```
+
+### union ###
+
+`union`操作用于合并两个或多个`SELECT`语句的结果集。
+
+下面为`union`的使用例子：
+
+```Javascript
+// SELECT * FROM `user` UNION SELECT * FROM book UNION SELECT * FROM user_book
+User.union('SELECT * FROM book').union('SELECT * FROM user_book').select().then(function(result) {});
+```
+
+对象作为参数的用法：
+
+```Javascript
+var unionA = {
+    field: 'author',
+    table: 'book'
+};
+
+var unionB = {
+    where: {
+        user_id: {
+            egt: 10
+        }
+    },
+    table: 'user_book'
+};
+
+// SELECT * FROM `user` UNION SELECT `author` FROM `book`  UNION SELECT * FROM `user_book` WHERE `user_id` >= 10
+// User.union(unionA).union(unionB).select().then(function(result) {});
+User.union([unionA, unionB]).select().then(function(result) {});
+```
+
+`union`方法支持`UNION ALL`，例如：
+
+```Javascript
+// SELECT * FROM `user` UNION ALL SELECT * FROM book UNION ALL SELECT * FROM user_book
+// User.union('SELECT * FROM book', true).union('SELECT * FROM user_book', true).select().then(function(result) {});
+User.union(['SELECT * FROM book', 'SELECT * FROM user_book'], true).select().then(function(result) {});
+```
+
+每个`union`方法相当于一个独立的`SELECT`语句。
+
+> UNION 内部的 SELECT 语句必须拥有相同数量的列。列也必须拥有相似的数据类型。同时，每条 SELECT 语句中的列的顺序必须相同。
 
 ## CRUD操作 ##
 
