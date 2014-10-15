@@ -113,10 +113,11 @@ npm install think-orm
     * [子查询](#%E5%AD%90%E6%9F%A5%E8%AF%A2)
         * [select](#select)
         * [buildSql](#buildsql)
+* [命名范围](#scope)
+* [字段映射](#%E5%AD%97%E6%AE%B5%E6%98%A0%E5%B0%84)
 * [数据验证](#%E6%95%B0%E6%8D%AE%E9%AA%8C%E8%AF%81)
 * [数据填充](#%E6%95%B0%E6%8D%AE%E5%A1%AB%E5%85%85)
-* [字段映射](#%E5%AD%97%E6%AE%B5%E6%98%A0%E5%B0%84)
-* [试图模型](#%E8%A7%86%E5%9B%BE%E6%A8%A1%E5%9E%8B)
+* [视图模型](#%E8%A7%86%E5%9B%BE%E6%A8%A1%E5%9E%8B)
 * [关联模型](#%E5%85%B3%E8%81%94%E6%A8%A1%E5%9E%8B)
 
 ## 设计理念 ##
@@ -1385,11 +1386,203 @@ Model.table(sql + ' aliasname').select().then(function(users) {});
 
 构造的子查询SQL可用于[连贯操作](#%E8%BF%9E%E8%B4%AF%E6%93%8D%E4%BD%9C)方法，例如`table`，`where`等。
 
+### 命名范围 ###
+
+在应用开发过程中，使用最多的操作还是数据查询操作，凭借ThinkORM的连贯操作的特性，可以使得查询操作变得更优雅和清晰，命名范围功能则是给模型操作定义了一系列的封装，让你更方便的操作数据。
+
+命名范围功能的优势在于可以一次定义多次调用，并且在项目中也能起到分工配合的规范，避免开发人员在写CURD操作的时候出现问题，项目经理只需要合理的规划命名范围即可。
+
+要使用命名范围功能，主要涉及到模型`_scope`属性的定义和`scope`连贯操作方法的使用。
+
+#### _scope属性 ####
+
+我们首先需要为模型定义`_scope`属性。例如，假设是`Article`模型：
+
+```Javascript
+var Article = ORM.model('article', function() {
+    return {
+        _scope: {
+            published: {
+                where: {
+                    status: 1
+                }
+            },
+
+            latest: {
+                order: 'id desc',
+                limit: 15
+            }
+        }
+    }
+});
+```
+
+`_scope`属性是一个数组，每个数组项表示定义一个命名范围，命名范围的定义格式为：
+
+```Javascript
+{
+    _scope: {
+        scopename: {
+            attrA: valueA,
+            attrB: valueB
+        }
+    }
+}
+```
+
+命名范围标识`scopename`：可以是任意的字符串，用于标识当前定义的命名范围名称。
+
+命名范围支持的属性包括：
+
+| 属性名 | 描述 |
+| ----- | --- |
+| where | 查询条件 |
+| field | 查询字段 |
+| order | 结果排序 |
+| table | 查询表名 |
+| limit | 结果限制 |
+|  page | 分页查询 |
+| having | having查询 |
+| group | group查询 |
+| lock  | 查询锁定 |
+| distinct | 去重查询 |
+| cache | 查询缓存 |
+
+每个命名范围的定义可以包括这些属性中一个或者多个。
+
+#### scope ####
+
+属性定义完成后，接下来就是使用`scope`方法进行命名范围的调用了，每调用一个命名范围，就相当于执行了命名范围中定义的相关操作选项对应的连贯操作方法。
+
+最简单的调用方式就直接调用某个命名范围，例如：
+
+```Javascript
+// SELECT * FROM `article` WHERE `status` = 1
+Article.scope('published').select().then(function(articles) {});
+
+// SELECT * FROM `article` ORDER BY id desc LIMIT 15
+Article.scope('latest').select().then(function(articles) {});
+```
+
+`scope`支持同时调用多个命名范围，例如：
+
+```Javascript
+// SELECT * FROM `article` WHERE `status` = 1 ORDER BY id desc LIMIT 15
+// Article.scope('latest, published').select().then(function(articles) {});
+Article.scope('latest').scope('published').select().then(function(articles) {});
+```
+
+如果两个命名范围的定义存在冲突，则后面调用的命名范围定义会覆盖前面的相同属性的定义。
+
+如果调用的命名范围标识不存在，则会忽略该命名范围，例如：
+
+```Javascript
+// SELECT * FROM `article` ORDER BY id desc LIMIT 15
+Article.scope('latest,normal').select().then(function(articles) {});
+```
+
+上面的命名范围中`normal`是不存在的，因此只有`latest`命名范围生效。
+
+#### 默认命名范围 ####
+
+系统支持默认命名范围功能，如果你定义了一个`default`命名范围，例如：
+
+```Javascript
+var Article = ORM.model('article', function() {
+    return {
+        _scope: {
+            default: {
+                where: {
+                    status: 1
+                }
+            }
+        }
+    }
+});
+```
+
+那么调用`default`命名范围可以直接使用：
+
+```Javascript
+// SELECT * FROM `article` WHERE `status` = 1
+Article.scope().select().then(function(articles) {});
+```
+
+而无需再传入命名范围标识名`default`：
+
+```Javascript
+Article.scope('default').select().then(function(articles) {});
+```
+
+虽然这两种方式是等效的。
+
+#### 命名范围调整 ####
+
+假设需要在`latest`命名范围的基础上增加额外的调整，可以使用：
+
+```Javascript
+// SELECT * FROM `article` LIMIT 5
+Article.scope('latest', { limit: 5 }).select().then(function(articles) {});
+```
+
+当然，也可以在两个命名范围的基础上进行调整，例如：
+
+```Javascript
+// SELECT * FROM `article` WHERE `status` = 1 ORDER BY id desc LIMIT 5
+Article.scope('published, latest', { limit: 5 }).select().then(function(articles) {});
+```
+
+#### 自定义命名范围 ####
+
+又或者，干脆不用任何现有的命名范围，我直接传入一个命名范围：
+
+```Javascript
+// SELECT `id`,`title` FROM `article` WHERE status=1 ORDER BY published_at DESC LIMIT 5
+Article.scope({ field: 'id, title', limit: 5, where: 'status=1', order: 'published_at DESC'}).select().then(function(atricle) {});
+```
+
+#### 与连贯操作混合使 ####
+
+命名范围一样可以和之前的连贯操作混合使用，例如定义了命名范围`_scope`属性：
+
+```Javascript
+var Article = ORM.model('article', function() {
+    return {
+        _scope: {
+            normal: {
+                where: 'status = 1',
+                field: 'id, title',
+                limit: 10
+            }
+        }
+    }
+});
+
+// SELECT `id`,`title` FROM `article` WHERE status = 1 LIMIT 8
+Article.scope('normal').limit(8).select().then(function(atricle) {});
+```
+
+如果定义的命名范围和连贯操作的属性有冲突，则后面调用的会覆盖前面的。如果是这样调用：
+
+```Javascript
+// SELECT `id`,`title` FROM `article` WHERE status = 1 LIMIT 10
+Article.limit(8).scope('normal').select().then(function(atricle) {});
+```
+
+#### 动态调用 ####
+
+除了采用`scope`方法调用命名范围外，我们还支持直接调用命名范围名称的方式来动态调用，例如：
+
+```Javascript
+// SELECT `id`,`title` FROM `article` WHERE status = 1 LIMIT 5
+Article.scope('normal', { limit: 5 }).select().then(function(atricle) {});
+```
+
+## 字段映射 ##
+
 ## 数据验证 ##
 
 ## 数据填充 ##
-
-## 字段映射 ##
 
 ## 视图模型 ##
 
