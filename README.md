@@ -114,7 +114,7 @@ npm install think-orm
         * [select](#select)
         * [buildSql](#buildsql)
 * [命名范围](#%E5%91%BD%E5%90%8D%E8%8C%83%E5%9B%B4)
-    * [_scope属性](#_scope%E5%B1%9E%E6%80%A7)
+    * [_scope](#_scope)
     * [scope](#scope)
     * [默认命名空间](#%E9%BB%98%E8%AE%A4%E5%91%BD%E5%90%8D%E8%8C%83%E5%9B%B4)
     * [命名范围调整](#%E5%91%BD%E5%90%8D%E8%8C%83%E5%9B%B4%E8%B0%83%E6%95%B4)
@@ -122,6 +122,8 @@ npm install think-orm
     * [与连贯操作混合使用](#%E4%B8%8E%E8%BF%9E%E8%B4%AF%E6%93%8D%E4%BD%9C%E6%B7%B7%E5%90%88%E4%BD%BF)
     * [动态调用](#%E5%8A%A8%E6%80%81%E8%B0%83%E7%94%A8)
 * [字段映射](#%E5%AD%97%E6%AE%B5%E6%98%A0%E5%B0%84)
+    * [_map](#_map)
+    * [parseFieldsMap](#parseFieldsMap)
 * [数据验证](#%E6%95%B0%E6%8D%AE%E9%AA%8C%E8%AF%81)
 * [数据填充](#%E6%95%B0%E6%8D%AE%E5%A1%AB%E5%85%85)
 * [视图模型](#%E8%A7%86%E5%9B%BE%E6%A8%A1%E5%9E%8B)
@@ -1393,7 +1395,7 @@ Model.table(sql + ' aliasname').select().then(function(users) {});
 
 构造的子查询SQL可用于[连贯操作](#%E8%BF%9E%E8%B4%AF%E6%93%8D%E4%BD%9C)方法，例如`table`，`where`等。
 
-### 命名范围 ###
+## 命名范围 ##
 
 在应用开发过程中，使用最多的操作还是数据查询操作，凭借ThinkORM的连贯操作的特性，可以使得查询操作变得更优雅和清晰，命名范围功能则是给模型操作定义了一系列的封装，让你更方便的操作数据。
 
@@ -1401,7 +1403,7 @@ Model.table(sql + ' aliasname').select().then(function(users) {});
 
 要使用命名范围功能，主要涉及到模型`_scope`属性的定义和`scope`连贯操作方法的使用。
 
-#### _scope属性 ####
+### _scope ###
 
 我们首先需要为模型定义`_scope`属性。例如，假设是`Article`模型：
 
@@ -1457,7 +1459,7 @@ var Article = ORM.model('article', function() {
 
 每个命名范围的定义可以包括这些属性中一个或者多个。
 
-#### scope ####
+### scope ###
 
 属性定义完成后，接下来就是使用`scope`方法进行命名范围的调用了，每调用一个命名范围，就相当于执行了命名范围中定义的相关操作选项对应的连贯操作方法。
 
@@ -1490,7 +1492,7 @@ Article.scope('latest,normal').select().then(function(articles) {});
 
 上面的命名范围中`normal`是不存在的，因此只有`latest`命名范围生效。
 
-#### 默认命名范围 ####
+### 默认命名范围 ###
 
 系统支持默认命名范围功能，如果你定义了一个`default`命名范围，例如：
 
@@ -1523,7 +1525,7 @@ Article.scope('default').select().then(function(articles) {});
 
 虽然这两种方式是等效的。
 
-#### 命名范围调整 ####
+### 命名范围调整 ###
 
 假设需要在`latest`命名范围的基础上增加额外的调整，可以使用：
 
@@ -1539,7 +1541,7 @@ Article.scope('latest', { limit: 5 }).select().then(function(articles) {});
 Article.scope('published, latest', { limit: 5 }).select().then(function(articles) {});
 ```
 
-#### 自定义命名范围 ####
+### 自定义命名范围 ###
 
 又或者，干脆不用任何现有的命名范围，我直接传入一个命名范围：
 
@@ -1576,7 +1578,7 @@ Article.scope('normal').limit(8).select().then(function(atricle) {});
 Article.limit(8).scope('normal').select().then(function(atricle) {});
 ```
 
-#### 动态调用 ####
+### 动态调用 ###
 
 除了采用`scope`方法调用命名范围外，我们还支持直接调用命名范围名称的方式来动态调用，例如：
 
@@ -1586,6 +1588,56 @@ Article.scope('normal', { limit: 5 }).select().then(function(atricle) {});
 ```
 
 ## 字段映射 ##
+
+ThinkORM的字段映射功能可以让你在表单中隐藏真正的数据表字段，而不用担心放弃自动创建表单对象的功能。
+
+### _map ###
+
+假设`User`表里面有`name`和`email`字段，如果需要映射成另外的字段，那么就需要先定义`_map`属性，例如：
+
+```Javascript
+var User = ORM.model('User', function() {
+    return {
+        _map: {
+            username: 'name',
+            mail: 'email'
+        }
+    }
+});
+```
+
+这样，在表单里面就可以直接使用`username`和`mail`名称作为表单数据提交了。我们使用`create`方法创建数据对象的时候，会自动转换成定义的实际数据表字段。例如：
+
+```Javascript
+User.create({ username: 'happen', mail: 'ormmap@orm.com' }).then(function(user) {
+    // { name: 'happen', email: 'ormmap@orm.com' }
+    console.log(user);
+});
+```
+
+> 字段映射还可以支持对主键的映射。
+
+### parseFieldsMap ###
+
+使用字段映射后，默认不会对读取的数据会自动处理：
+
+```Javascript
+User.find().then(function(user) {
+    // { id: 1, name: 'happen', email: 'abcaa@cc.ccom' }
+    console.log(user);
+});
+```
+
+如果想要进行映射之后的字段，可以使用`parseFieldsMap`方法：
+
+```Javascript
+User.find().then(function(user) {
+    // { id: 1, username: 'happen', mail: 'abcaa@cc.ccom' }
+    console.log(User.parseFieldsMap(user));
+});
+```
+
+通过上面的方式后，无论是`find`还是`select`方法读取后的数据中就包含了`username`和`mail`字段数据了，而不再有`name`和`email`字段数据了。
 
 ## 数据验证 ##
 
