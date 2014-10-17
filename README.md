@@ -80,6 +80,7 @@ npm install think-orm
         * [getField](#getField)
     * [数据更新](#%E6%95%B0%E6%8D%AE%E6%9B%B4%E6%96%B0)
     * [数据删除](#%E6%95%B0%E6%8D%AE%E5%88%A0%E9%99%A4)
+        * [delete](#delete)
 * [数据查询](#%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2)
     * [查询方式](#%E6%9F%A5%E8%AF%A2%E6%96%B9%E5%BC%8F)
         * [字符串条件](#%E5%AD%97%E7%AC%A6%E4%B8%B2%E6%9D%A1%E4%BB%B6)
