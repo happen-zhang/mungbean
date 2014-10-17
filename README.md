@@ -884,12 +884,61 @@ Post.where({title: 'hello'}).save({title: 'world'}).then(function(post) {
 
 ### 数据删除 ###
 
+#### delete ####
+
+ThinkORM删除数据使用`delete`方法, `delete`方法支持的连贯操作方法有：
+
+| 方法名  | 作用 | 参数类型 |
+| ------ | --- | ------- |
+| where  | 查询或者更新条件的定义 | String，Array，Object |
+| table  | 定义要操作的数据表名称 | String，Array |
+| alias  | 定义当前表的别名      | String |
+| order  | 定义结果排序 | String，Object |
+| limit  | 定义返回查询结果的数量 | String，Number |
+| lock   | 对查询having支持 | Boolean |
+| relation | 启用关联查询 | String |
+| scope | 命名范围 | String，Object |
+| comment | SQL注释 | String |
+
+例如，表示删除主键为1的数据：
+
 ```Javascript
-Post.delete({title: 'hello'}).then(function(oldPost) {
-    console.log('delete success.');
-}).catch(function(err) {
-    console.log(err);
-});
+// DELETE FROM `user` WHERE `id` = 1
+User.delete(1).then(function(result) {});
+```
+
+`delete`方法可以删除单个数据，也可以删除多个数据，这取决于删除条件，例如：
+
+```Javascript
+// DELETE FROM `user` WHERE `id` = 1
+User.where('id = 1').delete().then(function(result) {});
+
+// DELETE FROM `user` WHERE `id` IN ('100','101','102')
+User.delete('100, 101, 102').then(function(result) {});
+
+// DELETE FROM `user` WHERE (status = 0)
+User.where('status = 0').delete().then(function(result) {});
+```
+
+`delete`方法的返回值是删除的记录数，如果SQL出错将会抛出异常，结果值如果为0表示没有删除任何数据。
+
+也可以用`order`和`limit`方法来限制要删除的个数，例如：
+
+```Javascript
+// DELETE FROM `user` WHERE (status = 0) ORDER BY created_at LIMIT 5
+User.where('status = 0').order('created_at').limit(5).delete().then(function(result) {});
+```
+
+为了避免错删数据，如果没有传入任何条件进行删除操作的话，不会执行删除操作，例如：
+
+```Javascript
+User.delete().then(function(result) {});
+```
+
+不会删除任何数据，如果你确实要删除所有的记录，除非使用下面的方式：
+
+```Javascript
+User.where(1).delete().then(function(result) {});
 ```
 
 ## 数据查询 ##
