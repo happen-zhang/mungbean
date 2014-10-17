@@ -75,6 +75,9 @@ npm install think-orm
     * [数据创建](#%E6%95%B0%E6%8D%AE%E5%88%9B%E5%BB%BA)
     * [数据写入](#%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5)
     * [数据读取](#%E6%95%B0%E6%8D%AE%E8%AF%BB%E5%8F%96)
+        * [find](#find)
+        * [select](#select)
+        * [getField](#getField)
     * [数据更新](#%E6%95%B0%E6%8D%AE%E6%9B%B4%E6%96%B0)
     * [数据删除](#%E6%95%B0%E6%8D%AE%E5%88%A0%E9%99%A4)
 * [数据查询](#%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2)
@@ -750,17 +753,124 @@ Post.create({title: 'hello'}).then(function(post) {
 
 ### 数据读取 ###
 
+在ThinkORM中读取数据的方式很多，通常分为读取数据、读取数据集和读取字段值。
+
+数据查询方法支持的连贯操作方法可以见：[连贯操作](#%E8%BF%9E%E8%B4%AF%E6%93%8D%E4%BD%9C)
+
+> 注意：某些情况下有些连贯操作是无效的，例如limit方法对find方法是无效的。
+
+#### find ####
+
+读取数据是指读取数据表中的一行数据（或者关联数据），主要通过`find`方法完成，例如：
+
 ```Javascript
-// select posts from example.post table with id and title fields.
-// sql: SELECT `id`, `title` FROM `post` WHERE `id` < 3 ORDER BY `id` DESC;
-// [{id: 1, title: 'a'}, {id: 2, title: 'b'}]
-Post.field(['id', 'title']).where({ id: { 'lt': 3 } })
-                           .order('`id` desc')
-                           .select()
-                           .then(function(posts) {
-                               console.log(posts);
-                           });
+// SELECT * FROM `user` WHERE (status = 1 AND id >= 1) LIMIT 1
+User.where('status = 1 AND id >= 1').find().then(function(user) {
+    console.log(user);
+});
 ```
+
+`find`方法查询数据的时候可以配合相关的连贯操作方法，其中最关键的则是`where`方法。如何使用`where`方法，移步[where](#where)方法。
+
+如果查询出错，`find`方法会抛出异常，如果查询结果为空返回`null`，查询成功则返回一个对象（键值是字段名或者别名）。 如果上面的查询成功的话，会输出：
+
+```Javascript
+{
+    id: 1,
+    name: 'happen',
+    email: '',
+    age: 23,
+    gender: 'm',
+    score: 21,
+    status: 1,
+}
+```
+
+即使满足条件的数据不止一个，`find`方法也只会返回第一条记录（可以通过`order`方法排序后查询）。
+
+#### select ####
+
+读取数据集其实就是获取数据表中的多行记录（以及关联数据），使用`select`方法，使用示例：
+
+```Javascript
+// SELECT * FROM `user` WHERE (status = 1) ORDER BY id DESC LIMIT 5
+User.where('status = 1').order('id DESC').limit(5).select().then(function(users) {});
+```
+
+如果查询出错，`select`方法会抛出异常。如果查询结果为空，则返回空数组，即`[]`。否则返回一个对象数组。
+
+#### getField ####
+
+读取字段值其实就是获取数据表中的某个列的多个或者单个数据，最常用的方法是`getField`方法。
+
+```Javascript
+// SELECT `name` FROM `user` WHERE (status = 1)
+User.where('status = 1').getField('name').then(function(users) {});
+```
+
+默认情况下，当只有一个字段的时候，返回满足条件的数据表中的该字段的第一行的值。
+
+如果需要返回带整个列数据的数组，可以用：
+
+```Javascript
+// SELECT `name` FROM `user`
+// ['orm', 'nodejs', 'db']
+User.getField('name', true).then(function(names) {});
+```
+
+如果传入多个字段的话，默认返回一个对象：
+
+```Javascript
+// SELECT `id`,`name` FROM `user`
+User.getField('id, name', true).then(function(users) {
+    // 这里的结果是以id为键，name为值的形式
+    // [{ '1': 'orm' }, { '2': 'nodejs' }, { '3': 'db' } ]
+    console.log(users);
+});
+```
+
+再例如更多的字段：
+
+```Javascript
+// SELECT `id`,`name`,`email` FROM `user`
+User.getField('id, name, email').then(function(users) {
+    // [
+    //   { '1': { id: 1, name: 'orm', email: 'abc@orm.com' } },
+    //   { '2': { id: 2, name: 'nodejs', email: 'test@orm.com' } },
+    //   { '3': { id: 3, name: 'db', email: 'apple@orm.com' } }
+    // ]
+    console.log(users);
+});
+```
+
+上面结果类似`select`方法的返回结果，区别的是这个结果对象的键名是`id`，准确的说是`getField`方法的第一个字段名。
+
+如果传入一个字符串分隔符给`getField`方法：
+
+```Javascript
+User.getField('id, name, email').then(function(users) {
+    // [
+    //   { '1': 'happen:abc@orm.com' },
+    //   { '2': 'shumei:test@orm.com' },
+    //   { '3': 'hello:apple@orm.com' }
+    // ]
+    console.log(users);
+});
+```
+
+那么返回的结果就是一个数组，键名是`id`，键值是`name:email`的输出字符串。
+
+`getField`方法还可以支持限制数量，例如：
+
+```Javascript
+// SELECT `id`,`name` FROM `user` LIMIT 5
+User.getField('id, name', 5).then(function(users) {});
+
+// SELECT `name` FROM `user` LIMIT 3
+User.getField('name', 3).then(function(users) {});
+```
+
+可以配合使用`order`方法使用。更多的查询方法可以移步：[数据查询](#%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2)
 
 ### 数据更新 ###
 
