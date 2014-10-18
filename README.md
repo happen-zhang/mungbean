@@ -80,7 +80,7 @@ npm install think-orm
         * [getField](#getField)
     * [数据更新](#%E6%95%B0%E6%8D%AE%E6%9B%B4%E6%96%B0)
         * [save](#save)
-        * 字段更新和过滤
+        * [字段更新和过滤](#%E5%AD%97%E6%AE%B5%E6%9B%B4%E6%96%B0%E5%92%8C%E8%BF%87%E6%BB%A4)
         * [saveField](#saveField)
         * [saveInc](#saveInc)
         * [saveDec](#saveDec)
@@ -937,6 +937,21 @@ User.save(data);
 ```
 
 如果`id`是数据表的主键的话，ThinkORM自动会把主键的值作为更新条件来更新其他字段的值。
+
+还有一种方法是通过`create`或者`setData`方法创建要更新的数据对象，然后进行保存操作，这样`save`方法的参数可以不需要传入，例如：
+
+```Javascript
+// UPDATE `user` SET `name`='eventloop',`email`='js@orm.com',`age`=26 WHERE (id = 1)
+User.where('id = 1').setData(data).setData('age', 26).save().then(function(result) {});
+```
+
+或者使用`create`方法：
+
+```Javascript
+User.create().then(function(data) {
+    return User.save();
+}).then(function(result) {});
+```
 
 #### 字段更新和过滤 ####
 
