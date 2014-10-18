@@ -46,8 +46,10 @@ npm install think-orm
         * [字符串参数](#%E5%AD%97%E7%AC%A6%E4%B8%B2%E5%8F%82%E6%95%B0)
         * [对象参数](#%E5%AF%B9%E8%B1%A1%E5%8F%82%E6%95%B0)
         * [多次调用where](#%E5%A4%9A%E6%AC%A1%E8%B0%83%E7%94%A8where)
+    * [data](#data)
+        * [setData](#setData)
+        * [getData](#getData)
     * [table](#table)
-    * data
     * [alias](#alias)
     * [field](#field)
         * [返回指定的字段](#%E8%BF%94%E5%9B%9E%E6%8C%87%E5%AE%9A%E7%9A%84%E5%AD%97%E6%AE%B5)
@@ -196,7 +198,8 @@ ThinkORM支持的连贯操作方法有：
 | where  | 查询或者更新条件的定义 | String，Array，Object |
 | table  | 定义要操作的数据表名称 | String，Array |
 | alias  | 定义当前表的别名      | String |
-| data   | 新增或者更新数据之前有效的数据对象 | Object |
+| setData | 保存新增或者更新数据之前有效的数据对象 | String，Object |
+| getData | 保存新增或者更新数据之前有效的数据对象 | String |
 | field  | 定义查询或者更新需要的字段（支持字段排除） | String，Array |
 | order  | 定义结果排序 | String，Object |
 | limit  | 定义返回查询结果的数量 | String，Number |
@@ -290,6 +293,41 @@ User.where('id >= 1').where({ name: 'hello' }).where({ age: 20 }).select().then(
 多次的数组条件表达式会最终合并，但字符串条件则只支持一次。
 
 更多的查询用法，可以参考：[数据查询](#%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2)部分。
+
+### data ###
+
+在ThinkORM中，虽然没有实体对象的概念，但是ThinkORM中的每个模型示例都可以保存或读取一些临时数据，这些数据可以被保存到数据库中。保存数据的方法为`setData`，而读取数据的方法为`getData`。支持`setData`保存数据的方法用`add`和`save`方法。需要注意的是，每调用一次`add`或者`save`方法后，`setData`临时保存在模型中的数据将会被清空，即`getData`的数据将会被清空。
+
+#### setData ####
+
+`setData`方法也是模型类的连贯操作方法之一，用于设置当前要操作的数据对象的值。`setData`方法支持两种形式的调用，分别为`key-value`的形式和对象的形式，例如：
+
+```Javascript
+// hello
+// User.setData('name', 'hello').getData('name');
+User.setData({name: 'hello'}).getData('name');
+```
+
+`setData`保存的数据能被用在`add`或`save`方法上，即`setData`所保存的数据将会被用在本次的`add`或`save`方法中。
+
+```Javascript
+// INSERT INTO `user` (`name`,`email`,`age`) VALUES ('hello','v8@orm.com',18)
+User.setData('name', 'hello').setData('age', 18).add().then(function(result) {});
+
+// UPDATE `user` SET `name`='eventloop',`age`=26 WHERE (id = 1)
+User.where('id = 1').setData({name: 'eventloop', age: 26}).save().then(function(result) {});
+```
+
+> 调用完add或者save方法后，setData保存的数据都将会被清空，在下次add或save中无效。
+
+#### getData ####
+
+`getData`方法可以读取`setData`所保存的数据，它只有一个参数为键名的字符串。例如：
+
+```Javascript
+// hello
+User.setData({name: 'hello'}).getData('name');
+```
 
 ### table ###
 
