@@ -79,6 +79,11 @@ npm install think-orm
         * [select](#select)
         * [getField](#getField)
     * [数据更新](#%E6%95%B0%E6%8D%AE%E6%9B%B4%E6%96%B0)
+        * [save](#save)
+        * 字段更新和过滤
+        * [saveField](#saveField)
+        * [saveInc](#saveInc)
+        * [saveDec](#saveDec)
     * [数据删除](#%E6%95%B0%E6%8D%AE%E5%88%A0%E9%99%A4)
         * [delete](#delete)
 * [数据查询](#%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2)
@@ -184,7 +189,7 @@ User.where({ name: { like: 'orm' } }).save({ name: 'hello' }).then(function(resu
 
 连贯操作通常只有一个参数，并且仅在当此查询或者操作有效，完成后会自动清空连贯操作的所有传值（有个别特殊的连贯操作有多个参数，并且会记录当前的传值）。简而言之，连贯操作的结果不会带入以后的查询。
 
-系统支持的连贯操作方法有：
+ThinkORM支持的连贯操作方法有：
 
 | 方法名  | 作用 | 参数类型 |
 | ------ | --- | ------- |
@@ -206,7 +211,7 @@ User.where({ name: { like: 'orm' } }).save({ name: 'hello' }).then(function(resu
 | relation | 启用关联查询 | String |
 | validate | 数据自动验证 | Object |
 | auto | 数据自动完成 | Object |
-| filter | 数据过滤 | String |
+| filter | 数据过滤 | Function |
 | scope | 命名范围 | String，Object |
 | comment | SQL注释 | String |
 | index | 数据索引 | String |
@@ -290,7 +295,7 @@ User.where('id >= 1').where({ name: 'hello' }).where({ age: 20 }).select().then(
 
 `table`方法也属于模型类的连贯操作方法之一，主要用于指定操作的数据表。
 
-一般情况下，操作模型的时候系统能够自动识别当前对应的数据表，所以，使用`table`方法的情况通常是为了：
+一般情况下，操作模型的时候ThinkORM能够自动识别当前对应的数据表，所以，使用`table`方法的情况通常是为了：
 
 * 切换操作的数据表
 * 对多表进行操作
@@ -875,12 +880,127 @@ User.getField('name', 3).then(function(users) {});
 
 ### 数据更新 ###
 
+ThinkORM的数据更新操作包括更新数据和更新字段方法。
+
+#### save ####
+
+`save`方法支持的连贯操作方法有：
+
+| 方法名  | 作用 | 参数类型 |
+| ------ | --- | ------- |
+| where  | 查询或者更新条件的定义 | String，Array，Object |
+| table  | 定义要操作的数据表名称 | String，Array |
+| alias  | 定义当前表的别名      | String |
+| order  | 定义结果排序 | String，Object |
+| limit  | 定义返回查询结果的数量 | String，Number |
+| lock   | 对查询having支持 | Boolean |
+| relation | 启用关联查询 | String |
+| scope | 命名范围 | String，Object |
+| comment | SQL注释 | String |
+
+更新数据使用`save`方法，例如：
+
 ```Javascript
-Post.where({title: 'hello'}).save({title: 'world'}).then(function(post) {
-    console.log('update success.');
-}).catch(function(err) {
-    console.log(err);
-});
+var data = {
+    name: 'eventloop',
+    email: 'js@orm.com'
+}
+
+// UPDATE `user` SET `name`='eventloop',`email`='js@orm.com' WHERE (id = 1)
+User.where('id = 1').save(data).then(function(result) {});
+```
+
+`save`方法的结果是影响的记录数，如果SQL语句有错误，则抛出异常。
+
+为了保证数据库的安全，避免出错更新整个数据表，如果没有任何更新条件，数据对象本身也不包含主键字段的话，`save`方法不会更新任何数据库的记录，因此下面的代码不会更改数据库的任何记录
+：
+
+```Javascript
+var data = {
+    name: 'eventloop',
+    email: 'js@orm.com'
+};
+
+User.save(data);
+```
+
+下面这种形式就可以：
+
+```Javascript
+var data = {
+    id: 1,
+    name: 'eventloop',
+    email: 'js@orm.com'
+};
+
+User.save(data);
+```
+
+如果`id`是数据表的主键的话，ThinkORM自动会把主键的值作为更新条件来更新其他字段的值。
+
+#### 字段更新和过滤 ####
+
+和`add`方法一样，`save`方法支持使用`field`方法过滤字段和`filter`方法过滤数据，例如：
+
+```Javascript
+var data = {
+    name: 'eventloop',
+    email: 'js@\"orm.com'
+};
+
+// UPDATE `user` SET `email`='js@\\\"orm.com' WHERE (id = 1)
+User.where('id = 1').field('email').filter(utils.addslashes).save(data).then(function(result) {});
+```
+
+当使用`field('email')`的时候，只允许更新`email`字段的值（使用自定义的`utils.addslashes`方法过滤），`name`字段的值将不会被更新到数据库中。
+
+> filter方法的参数是Function类型的。
+
+#### saveField ####
+
+如果只是更新个别字段的值，可以使用`saveField`方法。
+
+例如只想更新`name`字段的值，那么可以如下例：
+
+```Javascript
+// UPDATE `user` SET `name`='newonehere' WHERE (id = 1)
+User.where('id = 1').saveField('name', 'newonehere').then(function(result) {});
+```
+
+`saveField`方法支持同时更新多个字段，只需要传入对象即可，例如：
+
+```Javascript
+var data = {
+    name: 'eventloop',
+    email: 'js@orm.com'
+};
+
+// UPDATE `user` SET `name`='eventloop',`email`='js@orm.com' WHERE (id = 1)
+User.where('id = 1').saveField(data).then(function(result) {});
+```
+
+#### saveInc ####
+
+而对于统计字段（通常指的是`数值类型`）的更新，ThinkORM还提供了`saveInc`方法。
+
+```Javascript
+// UPDATE `user` SET `score`=score+1 WHERE (id = 1)
+User.where('id = 1').saveInc('score').then(function(result) {});
+
+// UPDATE `user` SET `score`=score+3 WHERE (id = 1)
+User.where('id = 1').saveInc('score', 3).then(function(result) {});
+```
+
+#### saveDec ####
+
+同样的，`saveDec`方法也是如此：
+
+```Javascript
+// UPDATE `user` SET `score`=score-1 WHERE (id = 1)
+User.where('id = 1').saveDec('score').then(function(result) {});
+
+// UPDATE `user` SET `score`=score-5 WHERE (id = 1)
+User.where('id = 1').saveDec('score', 5).then(function(result) {});
 ```
 
 ### 数据删除 ###
