@@ -124,6 +124,7 @@ npm install think-orm
     * [子查询](#%E5%AD%90%E6%9F%A5%E8%AF%A2)
         * [select](#select)
         * [buildSql](#buildsql)
+* [ActiveRecord](#ActiveRecord)
 * [命名范围](#%E5%91%BD%E5%90%8D%E8%8C%83%E5%9B%B4)
     * [_scope](#_scope)
     * [scope](#scope)
@@ -1857,6 +1858,89 @@ Article.scope('default').select().then(function(articles) {});
 ```
 
 虽然这两种方式是等效的。
+
+### ActiveRecords ###
+
+ThinkORM实现了`ActiveRecords`模式的ORM模型，采用了非标准的ORM模型：表映射到类，记录映射到对象。最大的特点就是使用方便和便于理解（因为采用了对象化），提供了开发的最佳体验，从而达到敏捷开发的目的。
+
+下面我们用AR模式来换一种方式重新完成CURD操作。
+
+#### 创建数据对象 ####
+
+```javascript
+User.setData('name', 'hello').setData('age', 18).add().then(function(result) {});
+```
+
+如果使用了`create`方法创建数据对象的话，仍然可以在创建完成后进行赋值：
+
+```Javascript
+User.create().then(function() {
+    return User.setData('age', 18).add();
+}).then(function(result) {});
+```
+
+#### 查询记录 ####
+
+AR模式的数据查询比较简单，因为更多情况下面查询条件都是以主键或者某个关键的字段。这种类型的查询，ThinkORM有着很好的支持。 先举个最简单的例子，假如我们要查询主键为8的某个用户记录，如果按照之前的方式，我们可能会使用下面的方法：
+
+```Javascript
+// SELECT * FROM `user` WHERE (id = 8) LIMIT 1
+User.where('id = 8').find().then(function(user) {});
+```
+
+用AR模式的话可以直接写成：
+
+```Javascript
+// SELECT * FROM `user` WHERE (id = 8) LIMIT 1
+User.find(8).then(function(user) {});
+```
+
+如果要根据某个字段查询，例如查询姓名为ThinkORM的可以用：
+
+```Javascript
+// SELECT * FROM `user` WHERE `name` = 'hello' LIMIT 1
+User.getBy('name', 'hello').then(function(user) {});
+```
+
+这个作为查询语言来说是最为直观的，如果查询成功，查询的结果直接保存在当前的数据对象中，在进行下一次查询操作之前，我们都可以提取，例如获取查询的结果数据：
+
+```Javascript
+User.getData('name');
+
+User.getData('age');
+```
+
+如果要查询数据集，可以直接使用：
+
+```Javascript
+// SELECT * FROM `user` WHERE `id` IN ('1','3','5')
+User.select('1, 3, 5').then(function(user) {});
+```
+
+#### 更新记录 ####
+
+可以直接添加或修改数据对象然后保存到数据库。
+
+```Javascript
+// UPDATE `user` SET `name`='eventloop',`age`=26 WHERE (id = 1)
+User.where('id = 1').setData({name: 'eventloop', age: 26}).save().then(function(result) {});
+```
+
+#### 删除记录 ####
+
+可以删除当前查询的数据对象：
+
+```Javascript
+// DELETE FROM `user` WHERE `id` = 2
+User.delete(2).then(function(result) {});
+```
+
+或者直接根据主键进行删除：
+
+```Javascript
+// DELETE FROM `user` WHERE `id` IN ('100','101','102')
+User.delete('100, 101, 102').then(function(result) {});
+```
 
 ### 命名范围调整 ###
 
