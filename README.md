@@ -844,15 +844,114 @@ User.field('name, email').create(data).then(function(user) {
 
 ### 数据写入 ###
 
+#### add ####
+
+ThinkORM的数据写入操作使用`add`方法，使用示例如下：
+
 ```Javascript
-Post.create({title: 'hello'}).then(function(post) {
-    return Post.add(post);
-}).then(function(newPost) {
-    console.log('insert success.');
-}).otherwise(function(err) {
-    console.log(err);
-});
+var data = {
+    name: 'hello',
+    email: 'world@orm.com',
+    age: 18
+};
+
+// INSERT INTO `user` (`name`,`email`,`age`) VALUES ('hello','world@orm.com',18)
+User.add(data).then(function(result) {});
 ```
+
+或者使用`setData`方法连贯操作：
+
+```Javascript
+User.setData(data).then(function(result) {});
+```
+
+如果在`add`之前已经创建数据对象的话（例如使用了`create`或者`setData`方法），`add`方法就不需要再传入数据了。 使用`create`方法的例子：
+
+```Javascript
+User.create(data).then(function() {
+    return User.add();
+}).then(function(result) {});
+```
+
+`add`方法可以支持`REPLACE`语法，只需要给`add`传递第三个参数`true`值即可。例如：
+
+```Javascript
+var data = {
+    name: 'hello',
+    email: 'world@orm.com',
+    age: 18
+};
+
+// REPLACE INTO `user` (`name`,`email`,`age`) VALUES ('hello','world@orm.com',18)
+User.add(data, {}, true).then(function(result) {});
+```
+
+在执行`add`方法之前，我们可以调用相关的连贯操作方法，配合完成数据写入操作。`add`方法支持的连贯操作如下：
+
+| 方法名  | 作用 | 参数类型 |
+| ------ | --- | ------- |
+| table  | 定义要操作的数据表名称 | String，Array |
+| setData | 保存新增或者更新数据之前有效的数据对象 | String，Object |
+| field  | 定义查询或者更新需要的字段（支持字段排除） | String，Array |
+| relation | 启用关联查询 | String |
+| validate | 数据自动验证 | Object |
+| auto | 数据自动完成 | Object |
+| filter | 数据过滤 | Function |
+| scope | 命名范围 | String，Object |
+| comment | SQL注释 | String |
+
+#### 字段写入和过滤 ####
+
+```Javascript
+var data = {
+    name: 'hello',
+    age: 18,
+    test: 'world'
+};
+
+// INSERT INTO `user` (`name`,`age`) VALUES ('hello',18)
+User.add(data).then(function(result) {});
+```
+
+其中`test`字段是不存在的，所以写入数据的时候会自动过滤掉。
+
+如果在`add`方法之前调用`field`方法，则表示只允许写入指定的字段数据，其他非法字段将会被过滤，例如：
+
+```Javascript
+var data = {
+    name: 'hello',
+    email: 'world@orm.com',
+    age: 18
+};
+
+// INSERT INTO `user` (`name`) VALUES ('hello')
+User.field('name').add(data).then(function(result) {});
+```
+
+最终只有`name`字段的数据被允许写入，`age`和`email`字段直接被过滤了。
+
+通过`filter`方法可以对数据的值进行过滤处理，例如：
+
+```Javascript
+var data = {
+    name: 'eventloop',
+    email: 'js@\"orm.com'
+};
+
+// INSERT INTO `user` (`name`,`email`) VALUES ('eventloop','js@\\\"orm.com')
+User.filter(utils.addslashes).add(data).then(function(result) {});
+```
+
+#### addAll ####
+
+`addAll`方法支持批量插入，例如：
+
+```Javascript
+// INSERT INTO `user` (`age`,`name`) VALUES (21,'lili'),(18,'fangfang')
+User.addAll([{ age: 21, name: 'lili' }, { age: 18, name: 'fangfang' }]).then(function(result) {});
+```
+
+`addAll`方法的第二个参数表示是否使用`REPLACE`语法。
 
 ### 数据读取 ###
 
