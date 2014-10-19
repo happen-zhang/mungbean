@@ -75,6 +75,7 @@ npm install think-orm
     * index
 * [CRUD操作](#crud%E6%93%8D%E4%BD%9C)
     * [数据创建](#%E6%95%B0%E6%8D%AE%E5%88%9B%E5%BB%BA)
+        * [create](#create)
     * [数据写入](#%E6%95%B0%E6%8D%AE%E5%86%99%E5%85%A5)
     * [数据读取](#%E6%95%B0%E6%8D%AE%E8%AF%BB%E5%8F%96)
         * [find](#find)
@@ -780,13 +781,66 @@ User.field('id, name').where('score >= 100').comment('Find users whose score equ
 
 ### 数据创建 ###
 
+在进行数据操作之前，我们往往需要把数据的值计算出来后手动赋值给对象。ThinkORM可以帮助你快速地创建数据对象，最典型的应用就是自动根据表单数据创建数据对象，这个优势在一个数据表的字段非常之多的情况下尤其明显。
+
+#### create ####
+
+`create`方法可以用来创建对象，通过这个方法创建出来的对象都会经过一系列自定义的[自动验证](#%E6%95%B0%E6%8D%AE%E9%AA%8C%E8%AF%81)或[自动填充](#%E6%95%B0%E6%8D%AE%E5%A1%AB%E5%85%85)操作。如果定义检验或填充方法，那么`create`方法将返回一个空对象。例如，创建一个带有当前时间戳的`published_at`属性的对象，并对`title`属性进行检验：
+
 ```Javascript
-Post.create({title: 'hello'}).then(function(post) {
-    console.log(post);
-}).otherwise(function(err) {
-    console.log(err);
+Article.create({title: 'unexpect'}).then(function(article) {
+    // { title: 'unexpect', published_at: 1413684883 }
+    console.log(article);
 });
 ```
+
+`create`方法的第二个参数可以指定创建数据的操作状态，默认情况下是自动判断是写入还是更新操作。可以为`create`方法显式指定操作状态，例如：
+
+```Javascript
+User.create({}, ThinkORM.MODEL_UPDATE).then(function(user) {});
+```
+
+ThinkORM内置的数据操作状态包括`ThinkORM.MODEL_INSERT`（或者1）和`ThinkORM.MODEL_UPDATE`（或者2），当没有指定的时候，ThinkORM根据数据源是否包含主键数据来自动判断，如果存在主键数据，就当成`Model::MODEL_UPDATE`操作。
+
+不同的数据操作状态可以定义不同的数据验证和自动完成机制，所以，你可以自定义自己需要的数据操作状态。例如，可以设置登录操作的数据状态（假设为3）：
+
+```Javascript
+User.create({}, 3).then(function(user) {});
+```
+
+在进行`add`或者`save`操作数据写入或更新的时候，建议使用`create`方法进行一些自定义处理，这样数据表中不存在的字段以及非法的数据类型（例如对象、数组等非标量数据）是会自动过滤的，不用担心非数据表字段的写入导致SQL错误的问题。
+
+```Javascript
+User.create({ name: 'hello' }).then(function() {
+    return User.add();
+}).then(function(result) {});
+```
+
+在执行`create`方法之前，我们可以调用相关的连贯操作方法，配合完成数据创建操作。`create`方法支持的连贯操作方法包括：
+
+| 方法名  | 作用 | 参数类型 |
+| ------ | --- | ------- |
+| field  | 定义合法的字段 | String，Array |
+| validate | 数据自动验证 | Object |
+| auto | 数据自动完成 | Object |
+
+如果在`create`方法之前调用`field`方法，则表示只允许创建指定的字段数据，其他非法字段将会被过滤，例如：
+
+```Javascript
+var data = {
+    name: 'hello',
+    email: 'nodejs@orm.com',
+    age: 18,
+    status: 1
+};
+
+User.field('name, email').create(data).then(function(user) {
+    // { name: 'hello', email: 'nodejs@orm.com' }
+    console.log(user);
+});
+```
+
+最终只有`name`和`email`字段的数据被允许写入，`age`和`status`字段直接被过滤了，哪怕`status`也是数据表中的合法字段。
 
 ### 数据写入 ###
 
