@@ -47,8 +47,8 @@ npm install think-orm
         * [对象参数](#%E5%AF%B9%E8%B1%A1%E5%8F%82%E6%95%B0)
         * [多次调用where](#%E5%A4%9A%E6%AC%A1%E8%B0%83%E7%94%A8where)
     * [data](#data)
-        * [setData](#setData)
-        * [getData](#getData)
+        * [setData](#setdata)
+        * [getData](#getdata)
     * [table](#table)
     * [alias](#alias)
     * [field](#field)
@@ -83,13 +83,13 @@ npm install think-orm
     * [数据读取](#%E6%95%B0%E6%8D%AE%E8%AF%BB%E5%8F%96)
         * [find](#find)
         * [select](#select)
-        * [getField](#getField)
+        * [getField](#getfield)
     * [数据更新](#%E6%95%B0%E6%8D%AE%E6%9B%B4%E6%96%B0)
         * [save](#save)
         * [字段更新和过滤](#%E5%AD%97%E6%AE%B5%E6%9B%B4%E6%96%B0%E5%92%8C%E8%BF%87%E6%BB%A4)
-        * [saveField](#saveField)
-        * [saveInc](#saveInc)
-        * [saveDec](#saveDec)
+        * [saveField](#savefield)
+        * [saveInc](#saveinc)
+        * [saveDec](#savedec)
     * [数据删除](#%E6%95%B0%E6%8D%AE%E5%88%A0%E9%99%A4)
         * [delete](#delete)
 * [数据查询](#%E6%95%B0%E6%8D%AE%E6%9F%A5%E8%AF%A2)
@@ -143,7 +143,7 @@ npm install think-orm
     * [动态调用](#%E5%8A%A8%E6%80%81%E8%B0%83%E7%94%A8)
 * [字段映射](#%E5%AD%97%E6%AE%B5%E6%98%A0%E5%B0%84)
     * [_map](#_map)
-    * [parseFieldsMap](#parseFieldsMap)
+    * [parseFieldsMap](#parsefieldsmap)
 * [数据验证](#%E6%95%B0%E6%8D%AE%E9%AA%8C%E8%AF%81)
 * [数据填充](#%E6%95%B0%E6%8D%AE%E5%A1%AB%E5%85%85)
 * [视图模型](#%E8%A7%86%E5%9B%BE%E6%A8%A1%E5%9E%8B)
@@ -2071,7 +2071,7 @@ Article.scope('latest,normal').select().then(function(articles) {});
 
 ### 默认命名范围 ###
 
-系统支持默认命名范围功能，如果你定义了一个`default`命名范围，例如：
+ThinkORM支持默认命名范围功能，如果你定义了一个`default`命名范围，例如：
 
 ```Javascript
 var Article = ORM.model('article', function() {
@@ -2217,6 +2217,194 @@ User.find().then(function(user) {
 通过上面的方式后，无论是`find`还是`select`方法读取后的数据中就包含了`username`和`mail`字段数据了，而不再有`name`和`email`字段数据了。
 
 ## 数据验证 ##
+
+数据验证是ThinkORM提供的一种数据验证方法，可以在使用`create`创建数据对象的时候自动进行数据验证。
+
+数据验证有两种方式：
+
+* 静态方式：在定义模型的同时定义`_validate`属性来定义验证规则。
+* 动态方式：使用模型类的`validate`方法动态创建自动验证规则。
+
+无论是什么方式，验证规则的定义是统一的规则，定义格式为：
+
+```Javascript
+// [验证字段, 验证规则, 错误提示, 验证条件, 附加规则, 验证时间, 附加参数]
+['field', 'rule', 'message', 'condition', 'type', 'when', 'params']
+```
+
+### 验证规则项 ###
+
+下面就来说明一下以上各项的具体含义。
+
+#### 验证字段 ####
+
+验证字段：必需。
+
+需要验证的表单字段名称，这个字段不一定是数据库字段，也可以是表单的一些辅助字段，例如确认密码和验证码等等。有个别验证规则和字段无关的情况下，验证字段是可以随意设置的。如果定义了[字段映射]()的话，这里的验证字段名称应该是实际的数据表字段而不是表单字段。
+
+#### 验证规则 ####
+
+验证规则：必需。
+
+要进行验证的规则，需要结合附加规则，如果在使用正则验证的附加规则情况下，ThinkORM还内置了一些常用正则验证的规则（[regex]()），可以直接作为验证规则使用，包括：`require` 字段必须、`email` 邮箱、`url` URL地址、`currency` 货币、`number` 数字。
+
+#### 提示信息 ####
+
+提示信息：必需。
+
+用于验证失败后的提示信息定义。
+
+#### 验证条件 ####
+
+验证条件：可选。
+
+条件包含以下几种情况：
+
+* `ThinkORM.EXISTS_VALIDATE`或者0，即存在字段就验证（默认）
+* `ThinkORM.MUST_VALIDATE`或者1，即必须验证
+* `ThinkORM.VALUE_VALIDATE`或者2，即值不为空的时候验证
+
+#### 附加规则 ####
+
+附加规则：可选。
+
+配合验证规则使用，包括下面一些规则：
+
+| 规则 | 说明 |
+| ---- | ---- |
+| regex | 正则验证，定义的验证规则是一个正则表达式（默认）|
+| function（callback） | 函数（方法）验证，定义的验证规则是一个函数（方法）名 |
+| confirm | 验证两个字段的值是否相同，定义的验证规则是一个字段名 |
+| equal | 验证是否等于某个值，该值由前面的验证规则定义 |
+| notequal | 验证是否不等于某个值，该值由前面的验证规则定义 |
+| in | 验证是否在某个范围内，定义的验证规则可以是一个数组或者逗号分割的字符串
+| notin | 验证是否不在某个范围内，定义的验证规则可以是一个数组或者逗号分割的字符串 |
+| length | 验证长度，定义的验证规则可以是一个数字（表示固定长度）或者数字范围 |
+| between | 验证范围，定义的验证规则表示范围，可以使用字符串或者数组 |
+| nobetween | 验证不在某个范围，定义的验证规则表示范围，可以使用字符串或者数组 |
+
+#### 验证时间 ####
+
+验证时间：可选。
+
+* `ThinkORM.MODEL_INSERT`或者1新增数据时候验证
+* `ThinkORM.MODEL_UPDATE`或者2编辑数据时候验证
+* `ThinkORM.MODEL_BOTH`或者3全部情况下验证（默认）
+
+这里的验证时间需要注意，并非只有这三种情况，你可以根据业务需要增加其他的验证时间。
+
+#### 附加参数 ####
+
+附加参数：可选。
+
+我们可以为验证函数或方法提供附加参数，以到达期望的验证结果。
+
+### 静态定义 ###
+
+在模型类里面预先定义好该模型的自动验证规则，我们称为静态定义。
+
+举例说明，我们在`User`模型类里面定义的`_validate`属性如下：
+
+```Javascript
+var User = ORM.model('User', {
+    _validate: [
+        ['name', 'require', 'Name must not be empty.', ThinkORM.MUST_VALIDATE],
+
+        ['repasswd', 'passwd', 'Password is incorrect.', ThinkORM.EXISTS_VALIDATE, 'confirm'],
+
+        ['passwd', 'require', 'Password must not be empty.', ThinkORM.EXISTS_VALIDATE, 'regex', ThinkORM.MODEL_INSERT],
+
+        ['email', 'email', 'Invalid email.'],
+
+        ['score', '0, 100', 'Score is incorrect.', ThinkORM.MUST_VALIDATE, 'between'],
+
+        ['slug', utils.checkSlug, 'Parse slug failure.', ThinkORM.MUST_VALIDATE, 'function']
+    ]
+});
+```
+
+定义好验证规则后，就可以在使用`create`方法创建数据对象的时候自动调用：
+
+```Javascript
+User.create(data).then(function(user) {
+    return User.add();
+}).then(function(result) {
+    console.log(result);
+}).otherwise(function(errMsg) {
+    // console.log(User.getError());
+    console.log(errMsg);
+});
+```
+
+在进行自动验证的时候，ThinkORM会对定义好的验证规则进行依次验证。如果某一条验证规则没有通过，则会报错，`getError`方法返回的错误信息（字符串）就是对应字段的验证规则里面的错误提示信息。
+
+一般情况下，`create`方法会自动判断当前是新增数据还是编辑数据（主要是通过表单的隐藏数据添加主键信息），你也可以明确指定当前创建的数据对象是新增还是编辑，例如：
+
+```Javascript
+User.create(data, 1).then(function(user) {
+    console.log(user);
+}).otherwise(function(errMsg) {
+    console.log(errMsg);
+});
+```
+
+`create`方法的第二个参数就用于指定自动验证规则中的验证时间，也就是说`create`方法的自动验证只会验证符合验证时间的验证规则。
+
+我们在上面提到这里的验证时间并非只有这几种情况，你可以根据业务需要增加其他的验证时间，例如，你可以给登录操作专门指定验证时间为4。我们定义验证规则如下：
+
+```Javascript
+var User = ORM.model('User', {
+    _validate: [
+        ['name', 'require', 'Name must not be empty.', 0, 'regex', 4],
+    ]
+});
+```
+
+那么我们可以这样使用`create`方法了：
+
+```Javascript
+User.create(data, 4);
+```
+
+### 动态验证 ###
+
+如果采用动态验证的方式，就比较灵活，可以根据不同的需要，在操作同一个模型的时候使用不同的验证规则，例如：
+
+```Javascript
+var validations = [
+    ['name', 'require', 'Name must not be empty.', 1],
+
+    ['email', 'email', 'Invalid email.', 1],
+
+    ['age', '0, 100', 'Age is incorrect.', 1, 'between']
+];
+
+User.validate(validations).create({}).then(function(user) {
+    console.log(user);
+}).otherwise(function(err) {
+    console.log(err);
+});
+```
+
+### 批量验证 ###
+
+ThinkORM支持数据的批量验证功能，只需要在模型类里面设置`isPatchValidate`属性为`true`（ 默认为`false`）
+
+```Javascript
+var User = ORM.model('User', {
+    isPatchValidate: true
+});
+```
+
+设置批处理验证后，`getError`方法返回的错误信息是一个对象，返回格式是：
+
+```Javascript
+{
+    name: 'Name must not be empty.',
+    email: 'Invalid email.',
+    age: 'Age is incorrect.'
+}
+```
 
 ## 数据填充 ##
 
