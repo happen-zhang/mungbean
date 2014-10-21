@@ -2419,6 +2419,114 @@ var User = ORM.model('User', {
 
 ## 数据填充 ##
 
+数据完成是ThinkORM提供用来完成数据自动处理和过滤的方法，使用`create`方法创建数据对象的时候会自动完成数据处理。
+
+因此，在ThinkORM使用`create`方法来创建数据对象是更加安全的方式，而不是直接通过`add`或者`save`方法实现数据写入。
+
+数据填充通常用来完成默认字段写入，安全字段过滤以及业务逻辑的自动处理等，和自动验证的定义方式类似，数据填充的定义也支持静态定义和动态定义两种方式。
+
+* 静态方式：在模型类里面通过`_auto`属性定义处理规则。
+* 动态方式：使用模型类的`auto`方法动态创建自动处理规则。
+
+两种方式的定义规则都采用：
+
+```Javascript
+// [填充字段, 填充规则, 填充时间, 附加规则, 附加参数]
+['field', 'value', 'type', 'rule', 'params']
+```
+
+### 填充规则项 ###
+
+下面就来说明一下以上各项的具体含义。
+
+#### 填充字段 ####
+
+填充字段：必需。
+
+需要进行处理的数据表实际字段名称。
+
+#### 填充规则 ####
+
+填充规则：必需。
+
+需要处理的规则，配合附加规则完成。
+
+#### 填充时间 ####
+
+设置数据填充的时间，包括：
+
+| 时间 | 说明 |
+| ThinkORM.MODEL_INSERT 或者1 | 新增数据的时候处理（默认） |
+| ThinkORM.MODEL_UPDATE 或者2 | 更新数据的时候处理 |
+| ThinkORM.MODEL_BOTH 或者3 | 所有情况都进行处理 |
+
+#### 附加规则 ####
+
+支持的规则如下：
+
+| 规则 | 说明 |
+| function（callback） | 函数（方法）验证，定义的验证规则是一个函数（方法）名 |
+| field | 用其它字段填充，表示填充的内容是一个其他字段的值 |
+| string | 字符串（默认方式） |
+| ignore | 为空则忽略 |
+
+#### 附加参数 ####
+
+附加参数：可选。
+
+我们可以为验证函数或方法提供附加参数，以到达期望的验证结果。
+
+### 静态定义 ###
+
+预先在模型类里面定义好自动完成的规则，我们称之为静态定义。例如，我们在模型类定义`_auto`属性：
+
+```Javascript
+var User = ORM.model('User', function() {
+    return {
+        _auto: [
+            ['status', 1],
+
+            ['passwd', utils.md5, ThinkORM.MODEL_INSERT, 'function'],
+
+            ['created_at', utils.getTime, ThinkORM.MODEL_INSERT, 'function'],
+
+            ['updated_at', utils.getTime, ThinkORM.MODEL_UPDATE, 'function']
+        ]
+    }
+});
+```
+
+然后，就可以在使用`create`方法创建数据对象的时候自动处理：
+
+```Javascript
+User.create().then(function(user) {
+    console.log(user);
+    User.add();
+});
+```
+
+`create`方法的第二个参数就用于指定自动完成规则中的完成时间，也就是说`create`方法的自动处理规则只会处理符合完成时间的自动完成规则。`create`方法在创建数据的时候，已经自动过滤了非数据表字段数据信息，因此不需要担心表单会提交其他的非法字段信息而导致数据对象写入出错，甚至还可以自动过滤不希望用户在表单提交的字段信息（详见[数据验证](#%E6%95%B0%E6%8D%AE%E9%AA%8C%E8%AF%81)）。
+
+### 动态定义 ###
+
+除了静态定义之外，我们也可以采用动态完成的方式来解决不同的处理规则。
+
+```Javascript
+var rules = [
+    ['status', 1],
+
+    ['passwd', 'asdasdd', ThinkORM.MODEL_INSERT, 'function'],
+
+    ['created_at', (new Date()).getTime(), ThinkORM.MODEL_INSERT, 'function'],
+
+    ['updated_at', (new Date()).getTime(), ThinkORM.MODEL_UPDATE, 'function']
+];
+
+User.auto(rules).create().then(function(user) {
+    console.log(user);
+});
+```
+
 ## 视图模型 ##
 
 ## 关联模型 ##
