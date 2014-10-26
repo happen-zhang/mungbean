@@ -1,6 +1,6 @@
 {
-    "name": "think-orm",
-    "version": "1.0.1",
+    "name": "mungbean",
+    "version": "1.0.0",
     "description": "A powerful ORM tool for node.js, support Mysql.",
     "main": "index.js",
     "author": "happen-zhang <zhanghaipeng404@gmail.com>",
@@ -17,7 +17,7 @@
     ],
     "repository" : {
         "type": "git",
-        "url": "git://github.com/happen-zhang/cakes.git"
+        "url": "git://github.com/happen-zhang/mungbean.git"
     },
     "dependencies": {
         "mysql": "2.4.2",
