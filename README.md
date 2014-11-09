@@ -1,4 +1,4 @@
-ThinkORM —— 基于Node.js的简单、易容、强大的ORM工具。
+Mungbean —— 基于Node.js的简单、易容、强大的ORM工具。
 ==========
 
 # 概述 #
@@ -8,8 +8,8 @@ ThinkORM —— 基于Node.js的简单、易容、强大的ORM工具。
 ## 简单的例子 ##
 
 ```Javascript
-var ThinkORM = require('think-orm');
-var ORM = new ThinkORM({
+var Mungbean = require('mungbean');
+var ORM = new Mungbean({
     dbType   : 'mysql',
     host     : 'localhost',
     port     : 3306,
@@ -20,7 +20,7 @@ var ORM = new ThinkORM({
     charset  : 'utf8'
 });
 
-var User = ThinkORM.model('user');
+var User = ORM.model('user');
 
 // sql: SELECT * FROM `user` ORDER BY id DESC LIMIT 5
 User.order('id DESC').limit(5).select().then(function(users) {
@@ -32,7 +32,7 @@ User.order('id DESC').limit(5).select().then(function(users) {
 # 安装 #
 
 ```
-npm install think-orm
+npm install mungbean
 ```
 
 # 文档 #
@@ -170,9 +170,9 @@ npm install think-orm
 
 ## 设计理念 ##
 
-ThinkORM名字中带有'ORM'三个字母，可能大家会误以为其和传统ORM的设计思路相似，只是换了一层接口而已。其实，ThinkORM的设计思路和传统ORM的设计思路还是有比较大的区别的，这里就来说明ThinkORM的不同之处。
+Mungbean的设计思路有点不同，可能大家会误以为其和传统ORM的相似，只是换了一层接口而已。其实，Mungbean的设计思路和传统ORM的设计思路还是有比较大的区别的，这里就来说明Mungbean的不同之处。
 
-模型映射到一张表，对模型的操作就是直接对数据表进行操作。数据表中的一条记录不映射到一个对象上，在ThinkORM中没有这样的概念，数据表中的记录都只映射为javascript中的一个普通对象。
+模型映射到一张表，对模型的操作就是直接对数据表进行操作。数据表中的一条记录不映射到一个对象上，在Mungbean中没有这样的概念，数据表中的记录都只映射为javascript中的一个普通对象。
 
 ## 连接数据库 ##
 
@@ -180,7 +180,7 @@ ThinkORM名字中带有'ORM'三个字母，可能大家会误以为其和传统O
 
 ## 连贯操作 ##
 
-ThinkORM模型提供连贯操作方法（也可以称作链式操作），它可以有效的提高数据存取的代码清晰度和开发效率，并且支持所有的CRUD操作。
+Mungbean模型提供连贯操作方法（也可以称作链式操作），它可以有效的提高数据存取的代码清晰度和开发效率，并且支持所有的CRUD操作。
 
 连贯操作的使用也比较简单， 假如我们现在要查询一个`User`表的满足`status`值为1的前10条记录，并希望按照`created_at`排序 ，代码如下：
 
@@ -219,7 +219,7 @@ User.where({ name: { like: 'orm' } }).save({ name: 'hello' }).then(function(resu
 
 连贯操作通常只有一个参数，并且仅在当此查询或者操作有效，完成后会自动清空连贯操作的所有传值（有个别特殊的连贯操作有多个参数，并且会记录当前的传值）。简而言之，连贯操作的结果不会带入以后的查询。
 
-ThinkORM支持的连贯操作方法有：
+Mungbean支持的连贯操作方法有：
 
 | 方法名  | 作用 | 参数类型 |
 | ------ | --- | ------- |
@@ -324,7 +324,7 @@ User.where('id >= 1').where({ name: 'hello' }).where({ age: 20 }).select().then(
 
 ### data ###
 
-在ThinkORM中，虽然没有实体对象的概念，但是ThinkORM中的每个模型示例都可以保存或读取一些临时数据，这些数据可以被保存到数据库中。保存数据的方法为`setData`，而读取数据的方法为`getData`。支持`setData`保存数据的方法用`add`和`save`方法。需要注意的是，每调用一次`add`或者`save`方法后，`setData`临时保存在模型中的数据将会被清空，即`getData`的数据将会被清空。
+在Mungbean中，虽然没有实体对象的概念，但是Mungbean中的每个模型示例都可以保存或读取一些临时数据，这些数据可以被保存到数据库中。保存数据的方法为`setData`，而读取数据的方法为`getData`。支持`setData`保存数据的方法用`add`和`save`方法。需要注意的是，每调用一次`add`或者`save`方法后，`setData`临时保存在模型中的数据将会被清空，即`getData`的数据将会被清空。
 
 #### setData ####
 
@@ -361,7 +361,7 @@ User.setData({name: 'hello'}).getData('name');
 
 `table`方法也属于模型类的连贯操作方法之一，主要用于指定操作的数据表。
 
-一般情况下，操作模型的时候ThinkORM能够自动识别当前对应的数据表，所以，使用`table`方法的情况通常是为了：
+一般情况下，操作模型的时候Mungbean能够自动识别当前对应的数据表，所以，使用`table`方法的情况通常是为了：
 
 * 切换操作的数据表
 * 对多表进行操作
@@ -803,7 +803,7 @@ User.field('id, name').where('score >= 100').comment('Find users whose score equ
 
 ### 数据创建 ###
 
-在进行数据操作之前，我们往往需要把数据的值计算出来后手动赋值给对象。ThinkORM可以帮助你快速地创建数据对象，最典型的应用就是自动根据表单数据创建数据对象，这个优势在一个数据表的字段非常之多的情况下尤其明显。
+在进行数据操作之前，我们往往需要把数据的值计算出来后手动赋值给对象。Mungbean可以帮助你快速地创建数据对象，最典型的应用就是自动根据表单数据创建数据对象，这个优势在一个数据表的字段非常之多的情况下尤其明显。
 
 #### create ####
 
@@ -819,10 +819,10 @@ Article.create({title: 'unexpect'}).then(function(article) {
 `create`方法的第二个参数可以指定创建数据的操作状态，默认情况下是自动判断是写入还是更新操作。可以为`create`方法显式指定操作状态，例如：
 
 ```Javascript
-User.create({}, ThinkORM.MODEL_UPDATE).then(function(user) {});
+User.create({}, Mungbean.MODEL_UPDATE).then(function(user) {});
 ```
 
-ThinkORM内置的数据操作状态包括`ThinkORM.MODEL_INSERT`（或者1）和`ThinkORM.MODEL_UPDATE`（或者2），当没有指定的时候，ThinkORM根据数据源是否包含主键数据来自动判断，如果存在主键数据，就当成`Model::MODEL_UPDATE`操作。
+Mungbean内置的数据操作状态包括`Mungbean.MODEL_INSERT`（或者1）和`Mungbean.MODEL_UPDATE`（或者2），当没有指定的时候，Mungbean根据数据源是否包含主键数据来自动判断，如果存在主键数据，就当成`Mungbean.MODEL_UPDATE`操作。
 
 不同的数据操作状态可以定义不同的数据验证和自动完成机制，所以，你可以自定义自己需要的数据操作状态。例如，可以设置登录操作的数据状态（假设为3）：
 
@@ -868,7 +868,7 @@ User.field('name, email').create(data).then(function(user) {
 
 #### add ####
 
-ThinkORM的数据写入操作使用`add`方法，使用示例如下：
+Mungbean的数据写入操作使用`add`方法，使用示例如下：
 
 ```Javascript
 var data = {
@@ -977,7 +977,7 @@ User.addAll([{ age: 21, name: 'lili' }, { age: 18, name: 'fangfang' }]).then(fun
 
 ### 数据读取 ###
 
-在ThinkORM中读取数据的方式很多，通常分为读取数据、读取数据集和读取字段值。
+在Mungbean中读取数据的方式很多，通常分为读取数据、读取数据集和读取字段值。
 
 数据查询方法支持的连贯操作方法可以见：[连贯操作](#%E8%BF%9E%E8%B4%AF%E6%93%8D%E4%BD%9C)
 
@@ -1098,7 +1098,7 @@ User.getField('name', 3).then(function(users) {});
 
 ### 数据更新 ###
 
-ThinkORM的数据更新操作包括更新数据和更新字段方法。
+Mungbean的数据更新操作包括更新数据和更新字段方法。
 
 #### save ####
 
@@ -1154,7 +1154,7 @@ var data = {
 User.save(data);
 ```
 
-如果`id`是数据表的主键的话，ThinkORM自动会把主键的值作为更新条件来更新其他字段的值。
+如果`id`是数据表的主键的话，Mungbean自动会把主键的值作为更新条件来更新其他字段的值。
 
 还有一种方法是通过`create`或者`setData`方法创建要更新的数据对象，然后进行保存操作，这样`save`方法的参数可以不需要传入，例如：
 
@@ -1214,7 +1214,7 @@ User.where('id = 1').saveField(data).then(function(result) {});
 
 #### saveInc ####
 
-而对于统计字段（通常指的是`数值类型`）的更新，ThinkORM还提供了`saveInc`方法。
+而对于统计字段（通常指的是`数值类型`）的更新，Mungbean还提供了`saveInc`方法。
 
 ```Javascript
 // UPDATE `user` SET `score`=score+1 WHERE (id = 1)
@@ -1240,7 +1240,7 @@ User.where('id = 1').saveDec('score', 5).then(function(result) {});
 
 #### delete ####
 
-ThinkORM删除数据使用`delete`方法, `delete`方法支持的连贯操作方法有：
+Mungbean删除数据使用`delete`方法, `delete`方法支持的连贯操作方法有：
 
 | 方法名  | 作用 | 参数类型 |
 | ------ | --- | ------- |
@@ -1297,7 +1297,7 @@ User.where(1).delete().then(function(result) {});
 
 ## 数据查询 ##
 
-ThinkORM可以支持以字符串或者对象为条件的查询参数。但大多数情况下，使用对象查询参数会比较安全。
+Mungbean可以支持以字符串或者对象为条件的查询参数。但大多数情况下，使用对象查询参数会比较安全。
 
 ### 查询方式 ###
 
@@ -1312,7 +1312,7 @@ User.where('age >= 20 AND status = 1').select().then(function(users) {
 });
 ```
 
-> ThinkORM在对字符串条件查询时进行了对不安全字符的过滤，但建议用户在使用字符串查询时先进行必要的过滤。
+> Mungbean在对字符串条件查询时进行了对不安全字符的过滤，但建议用户在使用字符串查询时先进行必要的过滤。
 
 #### 对象条件 ####
 
@@ -1320,12 +1320,12 @@ User.where('age >= 20 AND status = 1').select().then(function(users) {
 
 ```Javascript
 var conditions = {
-    name: 'thinkorm',
+    name: 'mungbean',
     age: 12,
     status: 0
 };
 
-// SELECT * FROM `user` WHERE `name` = 'thinkorm' AND `age` = 12 AND `status` = 0
+// SELECT * FROM `user` WHERE `name` = 'mungbean' AND `age` = 12 AND `status` = 0
 User.where(conditions).select().then(function(users) {
     console.log(users);
 });
@@ -1335,25 +1335,25 @@ User.where(conditions).select().then(function(users) {
 
 ```Javascript
 var conditions = {
-    name: 'thinkorm',
+    name: 'mungbean',
     age: 12,
     status: 0,
     _logic: 'OR'
 };
 
-// SELECT * FROM `user` WHERE `name` = 'thinkorm' OR `age` = 12 OR `status` = 0
+// SELECT * FROM `user` WHERE `name` = 'mungbean' OR `age` = 12 OR `status` = 0
 User.where(conditions).select().then(function(users) {});
 ```
 
-在使用对象查询条件时，ThinkORM会自动检查字段的有效性。如果对象中定义的查询字段在表中不存在，ThinkORM则会把无效的字段过滤掉，例如：
+在使用对象查询条件时，Mungbean会自动检查字段的有效性。如果对象中定义的查询字段在表中不存在，Mungbean则会把无效的字段过滤掉，例如：
 
 ```Javascript
 var conditions = {
-    name: 'thinkorm',
+    name: 'mungbean',
     test: 'hello'
 };
 
-// SELECT * FROM `user` WHERE `name` = 'thinkorm'
+// SELECT * FROM `user` WHERE `name` = 'mungbean'
 User.where(conditions).select().then(function(users) {});
 ```
 
@@ -1659,7 +1659,7 @@ map['name&title|address'] = { like: 'orm' };
 
 ### 区间查询 ###
 
-ThinkORM支持对某些字段进行区间查询，例如：
+Mungbean支持对某些字段进行区间查询，例如：
 
 ```Javascript
 // `id` > 10 AND `id` < 30
@@ -1717,7 +1717,7 @@ User.where(map).select().then(funciton(users) {});
 
 ```Javascript
 var where = {
-    name: { like: '%thinkorm%' },
+    name: { like: '%mungbean%' },
     title: { like: '%nodejs%' },
     _logic: 'OR'
 };
@@ -1727,7 +1727,7 @@ var map = {
     _complex: where
 };
 
-// SELECT * FROM `post` WHERE `id` > 1 AND (`name` LIKE '%thinkorm%' OR `title` LIKE '%nodejs%')
+// SELECT * FROM `post` WHERE `id` > 1 AND (`name` LIKE '%mungbean%' OR `title` LIKE '%nodejs%')
 Post.where(map).select().then(function(posts) {});
 ```
 
@@ -1736,7 +1736,7 @@ Post.where(map).select().then(function(posts) {});
 ```Javascript
 var map = {
     id: { gt: 1 },
-    _string: "name LIKE '%thinkorm%' OR title LIKE '%nodejs%'"
+    _string: "name LIKE '%mungbean%' OR title LIKE '%nodejs%'"
 };
 ```
 
@@ -1744,7 +1744,7 @@ var map = {
 
 ### 统计查询 ###
 
-在应用中我们经常会用到一些统计数据，例如当前所有（或者满足某些条件）的用户数、所有用户的最大积分、用户的平均成绩等等，ThinkORM为这些统计操作提供了一系列的内置方法，这些方法的作用类似于SQL中对应的函数，包括：
+在应用中我们经常会用到一些统计数据，例如当前所有（或者满足某些条件）的用户数、所有用户的最大积分、用户的平均成绩等等，Mungbean为这些统计操作提供了一系列的内置方法，这些方法的作用类似于SQL中对应的函数，包括：
 
 |  方法  | 说明 |
 | ----- | ---- |
@@ -1812,7 +1812,7 @@ User.sum('age').then(function(result) {});
 
 ### SQL查询 ###
 
-ThinkORM虽然提供了许多方便的查询方法，但为了满足复杂查询的需要和一些特殊的数据操作，还是保留了支持原生SQL查询的功能。SQL查询的返回值依赖于底层库返回的结果，ThinkORM未对原生结果进行处理。
+Mungbean虽然提供了许多方便的查询方法，但为了满足复杂查询的需要和一些特殊的数据操作，还是保留了支持原生SQL查询的功能。SQL查询的返回值依赖于底层库返回的结果，Mungbean未对原生结果进行处理。
 
 支持原生SQL查询的方法有`query`和`execute`。
 
@@ -1848,7 +1848,7 @@ Model.query('SELECT * FROM __USER__');
 
 ### 字段查询 ###
 
-ThinkORM提供了字段查询，方便了可以按照某个字段的要求进行查询。
+Mungbean提供了字段查询，方便了可以按照某个字段的要求进行查询。
 
 #### getBy：根据字段值查询数据 ####
 
@@ -1882,7 +1882,7 @@ User.getFieldBy('id', { egt: 1 }, 'name, age, id').then(function(result) {});
 
 ### 子查询 ###
 
-ThinkORM提供两种方式来支持子查询，一种是通过`select`方法，另一种是`buildSql`方法。
+Mungbean提供两种方式来支持子查询，一种是通过`select`方法，另一种是`buildSql`方法。
 
 #### select ####
 
@@ -1910,7 +1910,7 @@ Model.table(sql + ' aliasname').select().then(function(users) {});
 
 ## ActiveRecords ##
 
-ThinkORM实现了`ActiveRecords`模式的ORM模型，采用了非标准的ORM模型：表映射到类，记录映射到对象。最大的特点就是使用方便和便于理解（因为采用了对象化），提供了开发的最佳体验，从而达到敏捷开发的目的。
+Mungbean实现了`ActiveRecords`模式的ORM模型，采用了非标准的ORM模型：表映射到类，记录映射到对象。最大的特点就是使用方便和便于理解（因为采用了对象化），提供了开发的最佳体验，从而达到敏捷开发的目的。
 
 下面我们用AR模式来换一种方式重新完成CURD操作。
 
@@ -1930,7 +1930,7 @@ User.create().then(function() {
 
 ### 查询记录 ###
 
-AR模式的数据查询比较简单，因为更多情况下面查询条件都是以主键或者某个关键的字段。这种类型的查询，ThinkORM有着很好的支持。 先举个最简单的例子，假如我们要查询主键为8的某个用户记录，如果按照之前的方式，我们可能会使用下面的方法：
+AR模式的数据查询比较简单，因为更多情况下面查询条件都是以主键或者某个关键的字段。这种类型的查询，Mungbean有着很好的支持。 先举个最简单的例子，假如我们要查询主键为8的某个用户记录，如果按照之前的方式，我们可能会使用下面的方法：
 
 ```Javascript
 // SELECT * FROM `user` WHERE (id = 8) LIMIT 1
@@ -1944,7 +1944,7 @@ User.where('id = 8').find().then(function(user) {});
 User.find(8).then(function(user) {});
 ```
 
-如果要根据某个字段查询，例如查询姓名为ThinkORM的可以用：
+如果要根据某个字段查询，例如查询姓名为Mungbean的可以用：
 
 ```Javascript
 // SELECT * FROM `user` WHERE `name` = 'hello' LIMIT 1
@@ -1993,7 +1993,7 @@ User.delete('100, 101, 102').then(function(result) {});
 
 ## 命名范围 ##
 
-在应用开发过程中，使用最多的操作还是数据查询操作，凭借ThinkORM的连贯操作的特性，可以使得查询操作变得更优雅和清晰，命名范围功能则是给模型操作定义了一系列的封装，让你更方便的操作数据。
+在应用开发过程中，使用最多的操作还是数据查询操作，凭借Mungbean的连贯操作的特性，可以使得查询操作变得更优雅和清晰，命名范围功能则是给模型操作定义了一系列的封装，让你更方便的操作数据。
 
 命名范围功能的优势在于可以一次定义多次调用，并且在项目中也能起到分工配合的规范，避免开发人员在写CURD操作的时候出现问题，项目经理只需要合理的规划命名范围即可。
 
@@ -2090,7 +2090,7 @@ Article.scope('latest,normal').select().then(function(articles) {});
 
 ### 默认命名范围 ###
 
-ThinkORM支持默认命名范围功能，如果你定义了一个`default`命名范围，例如：
+Mungbean支持默认命名范围功能，如果你定义了一个`default`命名范围，例如：
 
 ```Javascript
 var Article = ORM.model('article', function() {
@@ -2185,7 +2185,7 @@ Article.scope('normal', { limit: 5 }).select().then(function(atricle) {});
 
 ## 字段映射 ##
 
-ThinkORM的字段映射功能可以让你在表单中隐藏真正的数据表字段，而不用担心放弃自动创建表单对象的功能。
+Mungbean的字段映射功能可以让你在表单中隐藏真正的数据表字段，而不用担心放弃自动创建表单对象的功能。
 
 ### _map ###
 
@@ -2237,7 +2237,7 @@ User.find().then(function(user) {
 
 ## 数据验证 ##
 
-数据验证是ThinkORM提供的一种数据验证方法，可以在使用`create`创建数据对象的时候自动进行数据验证。
+数据验证是Mungbean提供的一种数据验证方法，可以在使用`create`创建数据对象的时候自动进行数据验证。
 
 数据验证有两种方式：
 
@@ -2265,7 +2265,7 @@ User.find().then(function(user) {
 
 验证规则：必需。
 
-要进行验证的规则，需要结合附加规则，如果在使用正则验证的附加规则情况下，ThinkORM还内置了一些常用正则验证的规则（[regex]()），可以直接作为验证规则使用，包括：`require` 字段必须、`email` 邮箱、`url` URL地址、`currency` 货币、`number` 数字。
+要进行验证的规则，需要结合附加规则，如果在使用正则验证的附加规则情况下，Mungbean还内置了一些常用正则验证的规则（[regex]()），可以直接作为验证规则使用，包括：`require` 字段必须、`email` 邮箱、`url` URL地址、`currency` 货币、`number` 数字。
 
 #### 提示信息 ####
 
@@ -2279,9 +2279,9 @@ User.find().then(function(user) {
 
 条件包含以下几种情况：
 
-* `ThinkORM.EXISTS_VALIDATE`或者0，即存在字段就验证（默认）
-* `ThinkORM.MUST_VALIDATE`或者1，即必须验证
-* `ThinkORM.VALUE_VALIDATE`或者2，即值不为空的时候验证
+* `Mungbean.EXISTS_VALIDATE`或者0，即存在字段就验证（默认）
+* `Mungbean.MUST_VALIDATE`或者1，即必须验证
+* `Mungbean.VALUE_VALIDATE`或者2，即值不为空的时候验证
 
 #### 附加规则 ####
 
@@ -2308,9 +2308,9 @@ User.find().then(function(user) {
 
 | 时间 | 说明 |
 | ---- | --- |
-| ThinkORM.MODEL_INSERT 或者1 | 新增数据时候验证 |
-| ThinkORM.MODEL_UPDATE 或者2 | 编辑数据时候验证 |
-| ThinkORM.MODEL_BOTH 或者3 | 所有情况下验证（默认） |
+| Mungbean.MODEL_INSERT 或者1 | 新增数据时候验证 |
+| Mungbean.MODEL_UPDATE 或者2 | 编辑数据时候验证 |
+| Mungbean.MODEL_BOTH 或者3 | 所有情况下验证（默认） |
 
 这里的验证时间需要注意，并非只有这三种情况，你可以根据业务需要增加其他的验证时间。
 
@@ -2329,17 +2329,17 @@ User.find().then(function(user) {
 ```Javascript
 var User = ORM.model('User', {
     _validate: [
-        ['name', 'require', 'Name must not be empty.', ThinkORM.MUST_VALIDATE],
+        ['name', 'require', 'Name must not be empty.', Mungbean.MUST_VALIDATE],
 
-        ['repasswd', 'passwd', 'Password is incorrect.', ThinkORM.EXISTS_VALIDATE, 'confirm'],
+        ['repasswd', 'passwd', 'Password is incorrect.', Mungbean.EXISTS_VALIDATE, 'confirm'],
 
-        ['passwd', 'require', 'Password must not be empty.', ThinkORM.EXISTS_VALIDATE, 'regex', ThinkORM.MODEL_INSERT],
+        ['passwd', 'require', 'Password must not be empty.', Mungbean.EXISTS_VALIDATE, 'regex', Mungbean.MODEL_INSERT],
 
         ['email', 'email', 'Invalid email.'],
 
-        ['score', '0, 100', 'Score is incorrect.', ThinkORM.MUST_VALIDATE, 'between'],
+        ['score', '0, 100', 'Score is incorrect.', Mungbean.MUST_VALIDATE, 'between'],
 
-        ['slug', utils.checkSlug, 'Parse slug failure.', ThinkORM.MUST_VALIDATE, 'function']
+        ['slug', utils.checkSlug, 'Parse slug failure.', Mungbean.MUST_VALIDATE, 'function']
     ]
 });
 ```
@@ -2357,7 +2357,7 @@ User.create(data).then(function(user) {
 });
 ```
 
-在进行自动验证的时候，ThinkORM会对定义好的验证规则进行依次验证。如果某一条验证规则没有通过，则会报错，`getError`方法返回的错误信息（字符串）就是对应字段的验证规则里面的错误提示信息。
+在进行自动验证的时候，Mungbean会对定义好的验证规则进行依次验证。如果某一条验证规则没有通过，则会报错，`getError`方法返回的错误信息（字符串）就是对应字段的验证规则里面的错误提示信息。
 
 一般情况下，`create`方法会自动判断当前是新增数据还是编辑数据（主要是通过表单的隐藏数据添加主键信息），你也可以明确指定当前创建的数据对象是新增还是编辑，例如：
 
@@ -2409,7 +2409,7 @@ User.validate(validations).create({}).then(function(user) {
 
 ### 批量验证 ###
 
-ThinkORM支持数据的批量验证功能，只需要在模型类里面设置`isPatchValidate`属性为`true`（ 默认为`false`）
+Mungbean支持数据的批量验证功能，只需要在模型类里面设置`isPatchValidate`属性为`true`（ 默认为`false`）
 
 ```Javascript
 var User = ORM.model('User', {
@@ -2429,9 +2429,9 @@ var User = ORM.model('User', {
 
 ## 数据填充 ##
 
-数据完成是ThinkORM提供用来完成数据自动处理和过滤的方法，使用`create`方法创建数据对象的时候会自动完成数据处理。
+数据完成是Mungbean提供用来完成数据自动处理和过滤的方法，使用`create`方法创建数据对象的时候会自动完成数据处理。
 
-因此，在ThinkORM使用`create`方法来创建数据对象是更加安全的方式，而不是直接通过`add`或者`save`方法实现数据写入。
+因此，在Mungbean使用`create`方法来创建数据对象是更加安全的方式，而不是直接通过`add`或者`save`方法实现数据写入。
 
 数据填充通常用来完成默认字段写入，安全字段过滤以及业务逻辑的自动处理等，和自动验证的定义方式类似，数据填充的定义也支持静态定义和动态定义两种方式。
 
@@ -2467,9 +2467,9 @@ var User = ORM.model('User', {
 
 | 时间 | 说明 |
 | ---- | --- |
-| ThinkORM.MODEL_INSERT 或者1 | 新增数据的时候处理（默认） |
-| ThinkORM.MODEL_UPDATE 或者2 | 更新数据的时候处理 |
-| ThinkORM.MODEL_BOTH 或者3 | 所有情况都进行处理 |
+| Mungbean.MODEL_INSERT 或者1 | 新增数据的时候处理（默认） |
+| Mungbean.MODEL_UPDATE 或者2 | 更新数据的时候处理 |
+| Mungbean.MODEL_BOTH 或者3 | 所有情况都进行处理 |
 
 #### 附加规则 ####
 
@@ -2498,11 +2498,11 @@ var User = ORM.model('User', function() {
         _auto: [
             ['status', 1],
 
-            ['passwd', utils.md5, ThinkORM.MODEL_INSERT, 'function'],
+            ['passwd', utils.md5, Mungbean.MODEL_INSERT, 'function'],
 
-            ['created_at', utils.getTime, ThinkORM.MODEL_INSERT, 'function'],
+            ['created_at', utils.getTime, Mungbean.MODEL_INSERT, 'function'],
 
-            ['updated_at', utils.getTime, ThinkORM.MODEL_UPDATE, 'function']
+            ['updated_at', utils.getTime, Mungbean.MODEL_UPDATE, 'function']
         ]
     }
 });
@@ -2527,11 +2527,11 @@ User.create().then(function(user) {
 var rules = [
     ['status', 1],
 
-    ['passwd', 'asdasdd', ThinkORM.MODEL_INSERT, 'function'],
+    ['passwd', 'asdasdd', Mungbean.MODEL_INSERT, 'function'],
 
-    ['created_at', (new Date()).getTime(), ThinkORM.MODEL_INSERT, 'function'],
+    ['created_at', (new Date()).getTime(), Mungbean.MODEL_INSERT, 'function'],
 
-    ['updated_at', (new Date()).getTime(), ThinkORM.MODEL_UPDATE, 'function']
+    ['updated_at', (new Date()).getTime(), Mungbean.MODEL_UPDATE, 'function']
 ];
 
 User.auto(rules).create().then(function(user) {
